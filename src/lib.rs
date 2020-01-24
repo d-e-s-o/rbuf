@@ -94,6 +94,40 @@ impl<T> RingBuf<T> {
     self.data.len()
   }
 
+  /// Retrieve the current "front" element, i.e., the element that got
+  /// inserted most recently.
+  pub fn front(&self) -> &T {
+    &self.data[self.front_idx()]
+  }
+
+  /// Retrieve the current "front" index, i.e., the index of the element
+  /// that got inserted most recently.
+  ///
+  /// Note that this index only has real relevance when accessing the
+  /// underlying slice using `deref`.
+  pub fn front_idx(&self) -> usize {
+    if self.next == 0 {
+      self.len() - 1
+    } else {
+      self.next - 1
+    }
+  }
+
+  /// Retrieve the current "back" element, i.e., the element that got
+  /// inserted the furthest in the past.
+  pub fn back(&self) -> &T {
+    &self.data[self.back_idx()]
+  }
+
+  /// Retrieve the current "back" index, i.e., the index of the element
+  /// that got inserted the furthest in the past.
+  ///
+  /// Note that this index only has real relevance when accessing the
+  /// underlying slice using `deref`.
+  pub fn back_idx(&self) -> usize {
+    self.next
+  }
+
   /// Push an element into the ring buffer.
   ///
   /// This operation will evict the ring buffer's least recently added
@@ -193,5 +227,39 @@ pub mod tests {
 
     buf.push_front(2);
     assert_equal(&buf, vec![13, 0, 7, 2]);
+  }
+
+  #[test]
+  fn front_back() {
+    let mut buf = RingBuf::<usize>::new(3);
+
+    assert_eq!(*buf.front(), 0);
+    assert_eq!(buf.front_idx(), 2);
+    assert_eq!(*buf.back(), 0);
+    assert_eq!(buf.back_idx(), 0);
+
+    buf.push_front(2);
+    assert_eq!(*buf.front(), 2);
+    assert_eq!(buf.front_idx(), 0);
+    assert_eq!(*buf.back(), 0);
+    assert_eq!(buf.back_idx(), 1);
+
+    buf.push_front(5);
+    assert_eq!(*buf.front(), 5);
+    assert_eq!(buf.front_idx(), 1);
+    assert_eq!(*buf.back(), 0);
+    assert_eq!(buf.back_idx(), 2);
+
+    buf.push_front(3);
+    assert_eq!(*buf.front(), 3);
+    assert_eq!(buf.front_idx(), 2);
+    assert_eq!(*buf.back(), 2);
+    assert_eq!(buf.back_idx(), 0);
+
+    buf.push_front(10);
+    assert_eq!(*buf.front(), 10);
+    assert_eq!(buf.front_idx(), 0);
+    assert_eq!(*buf.back(), 5);
+    assert_eq!(buf.back_idx(), 1);
   }
 }
