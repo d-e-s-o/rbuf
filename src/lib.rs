@@ -46,6 +46,17 @@ impl<'b, T> ExactSizeIterator for RingIter<'b, T> {}
 impl<'b, T> FusedIterator for RingIter<'b, T> {}
 
 
+#[macro_export]
+macro_rules! ring_buf [
+  ($($x:expr), *) => {
+    ::rbuf::RingBuf::from_vec(::std::vec![$($x),*])
+  };
+  ($($x:expr,) *) => {
+    ::rbuf::RingBuf::from_vec(::std::vec![$($x),*])
+  };
+];
+
+
 /// A ring buffer for arbitrary but default-initializable data.
 ///
 /// The ring buffer is always "full", but may only contain "default"
@@ -76,19 +87,30 @@ where
   ///
   /// `len` must be greater than zero.
   pub fn new(len: usize) -> Self {
-    assert!(len > 0);
-
     let mut vec = Vec::with_capacity(len);
     vec.resize_with(len, Default::default);
+
+    Self::from_vec(vec)
+  }
+}
+
+impl<T> RingBuf<T> {
+  /// Create a new `RingBuf` with data from a `Vec`.
+  ///
+  /// Note that the vector's first element is considered the oldest one,
+  /// which means that the first read will access it and pushed data
+  /// will overwrite it first.
+  /// Note furthermore that the provided `Vec` is required to contain at
+  /// least a single element.
+  pub fn from_vec(vec: Vec<T>) -> Self {
+    assert!(vec.len() > 0);
 
     Self {
       data: vec.into_boxed_slice(),
       next: 0,
     }
   }
-}
 
-impl<T> RingBuf<T> {
   /// Retrieve the ring buffer's length.
   pub const fn len(&self) -> usize {
     self.data.len()
