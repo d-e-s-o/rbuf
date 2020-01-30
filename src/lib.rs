@@ -4,6 +4,8 @@
 use std::iter::FusedIterator;
 use std::ops::Deref;
 use std::ops::DerefMut;
+use std::ops::Index;
+use std::ops::IndexMut;
 
 
 /// An iterator over a `RingBuf`.
@@ -67,6 +69,13 @@ macro_rules! ring_buf [
 ///
 /// One implication of the above is that iteration will always yield as
 /// many elements as the ring buffer's size.
+///
+/// Indexing into the ring buffer using bracket notation works in such a
+/// way that an index of `0` always accesses the least recently added
+/// element and an index of `self.len() - 1` the most recently added
+/// one. Furthermore, indexes wrap around at the ring buffer's end,
+/// meaning that an index of value `self.len()` would access the same
+/// element as index `0`.
 #[derive(Clone, Debug, PartialEq)]
 pub struct RingBuf<T> {
   /// Our actual data.
@@ -126,7 +135,9 @@ impl<T> RingBuf<T> {
   /// that got inserted most recently.
   ///
   /// Note that this index only has real relevance when accessing the
-  /// underlying slice using `deref`.
+  /// underlying slice using `deref`. In particular, the index returned
+  /// by this method should not be confused with those as expected by
+  /// our `Index` implementation (as accessible through bracket syntax).
   pub fn front_idx(&self) -> usize {
     if self.next == 0 {
       self.len() - 1
@@ -145,7 +156,9 @@ impl<T> RingBuf<T> {
   /// that got inserted the furthest in the past.
   ///
   /// Note that this index only has real relevance when accessing the
-  /// underlying slice using `deref`.
+  /// underlying slice using `deref`. In particular, the index returned
+  /// by this method should not be confused with those as expected by
+  /// our `Index` implementation (as accessible through bracket syntax).
   pub fn back_idx(&self) -> usize {
     self.next
   }
@@ -182,6 +195,22 @@ impl<T> Deref for RingBuf<T> {
 impl<T> DerefMut for RingBuf<T> {
   fn deref_mut(&mut self) -> &mut Self::Target {
     self.data.deref_mut()
+  }
+}
+
+impl<T> Index<usize> for RingBuf<T> {
+  type Output = T;
+
+  fn index(&self, idx: usize) -> &Self::Output {
+    let idx = (self.back_idx() + idx) % self.len();
+    self.data.index(idx)
+  }
+}
+
+impl<T> IndexMut<usize> for RingBuf<T> {
+  fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
+    let idx = (self.back_idx() + idx) % self.len();
+    self.data.index_mut(idx)
   }
 }
 
@@ -283,5 +312,22 @@ pub mod tests {
     assert_eq!(buf.front_idx(), 0);
     assert_eq!(*buf.back(), 5);
     assert_eq!(buf.back_idx(), 1);
+  }
+
+  #[test]
+  fn buf_index() {
+    let mut buf = RingBuf::from_vec(vec![3, 4, 5, 6]);
+    assert_eq!(buf[0], 3);
+    assert_eq!(buf[1], 4);
+    assert_eq!(buf[2], 5);
+    assert_eq!(buf[3], 6);
+    assert_eq!(buf[4], 3);
+
+    buf.push_front(8);
+    assert_eq!(buf[0], 4);
+    assert_eq!(buf[1], 5);
+    assert_eq!(buf[2], 6);
+    assert_eq!(buf[3], 8);
+    assert_eq!(buf[4], 4);
   }
 }
