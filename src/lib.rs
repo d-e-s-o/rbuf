@@ -1,6 +1,7 @@
 // Copyright (C) 2020 Daniel Mueller <deso@posteo.net>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+use std::iter::DoubleEndedIterator;
 use std::iter::FusedIterator;
 use std::ops::Deref;
 use std::ops::DerefMut;
@@ -9,26 +10,22 @@ use std::ops::IndexMut;
 
 
 /// An iterator over a `RingBuf`.
-///
-/// Note that currently iteration is only possible in a forwards manner,
-/// from back to front (i.e., in the order elements were pushed into the
-/// buffer).
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct RingIter<'b, T> {
   /// The actual ring buffer we work with.
   buf: &'b RingBuf<T>,
-  /// The index of the next element to yield.
+  /// The index of the next element to yield in forward direction.
   next: usize,
+  /// The index of the next element to yield in backward direction.
+  next_back: usize,
 }
 
 impl<'b, T> Iterator for RingIter<'b, T> {
   type Item = &'b T;
 
   fn next(&mut self) -> Option<Self::Item> {
-    let len = self.buf.len();
-
-    if self.next < self.buf.next + len {
-      let elem = &self.buf.data[self.next % len];
+    if self.next < self.next_back {
+      let elem = &self.buf.data[self.next % self.buf.len()];
       self.next += 1;
       Some(elem)
     } else {
@@ -38,8 +35,21 @@ impl<'b, T> Iterator for RingIter<'b, T> {
 
   /// Return the bounds on the remaining length of the iterator.
   fn size_hint(&self) -> (usize, Option<usize>) {
-    let len = self.buf.next + self.buf.len() - self.next;
+    let len = self.next_back - self.next;
     (len, Some(len))
+  }
+}
+
+impl<'b, T> DoubleEndedIterator for RingIter<'b, T> {
+  fn next_back(&mut self) -> Option<Self::Item> {
+    if self.next < self.next_back {
+      debug_assert!(self.next_back > 0);
+      self.next_back -= 1;
+      let elem = &self.buf.data[self.next_back % self.buf.len()];
+      Some(elem)
+    } else {
+      None
+    }
   }
 }
 
@@ -180,6 +190,9 @@ impl<T> RingBuf<T> {
     RingIter {
       buf: self,
       next: self.next,
+      // By adding our buffer's length here we ensure that the
+      // iterator's `next` is always less or equal to `next_back`.
+      next_back: self.next + self.len(),
     }
   }
 }
@@ -244,10 +257,11 @@ pub mod tests {
 
   #[test]
   fn iter_next() {
-    let assert_equal = |buf: &RingBuf<usize>, expected: Vec<usize>| {
-      let mut it_buf = buf.iter();
-      let mut it_exp = expected.iter();
-
+    fn assert_equal_impl<I1, I2>(mut it_buf: I1, mut it_exp: I2)
+    where
+      I1: ExactSizeIterator<Item = usize>,
+      I2: ExactSizeIterator<Item = usize>,
+    {
       loop {
         let next_buf = it_buf.next();
         let next_exp = it_exp.next();
@@ -260,7 +274,12 @@ pub mod tests {
         assert_eq!(it_buf.size_hint(), it_exp.size_hint());
         assert_eq!(it_buf.len(), it_exp.len());
       }
-    };
+    }
+
+    fn assert_equal(buf: &RingBuf<usize>, expected: Vec<usize>) {
+      assert_equal_impl(buf.iter().cloned(), expected.iter().cloned());
+      assert_equal_impl(buf.iter().cloned().rev(), expected.iter().cloned().rev());
+    }
 
     let mut buf = RingBuf::<usize>::new(4);
 
@@ -278,6 +297,22 @@ pub mod tests {
 
     buf.push_front(2);
     assert_equal(&buf, vec![13, 0, 7, 2]);
+  }
+
+  #[test]
+  fn double_ended_iter() {
+    let buf = RingBuf::from_vec(vec![4, 5, 6, 7, 8]);
+    let mut it = buf.iter();
+
+    assert_eq!(it.next_back(), Some(8).as_ref());
+    assert_eq!(it.next(), Some(4).as_ref());
+    assert_eq!(it.next_back(), Some(7).as_ref());
+    assert_eq!(it.next_back(), Some(6).as_ref());
+    assert_eq!(it.next(), Some(5).as_ref());
+    assert_eq!(it.next(), None);
+    assert_eq!(it.next(), None);
+    assert_eq!(it.next(), None);
+    assert_eq!(it.next(), None);
   }
 
   #[test]

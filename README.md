@@ -5,6 +5,7 @@ rbuf
 ====
 
 - [Documentation][docs-rs]
+- [Changelog](CHANGELOG.md)
 
 A crate providing a general purpose ring buffer implementation with some
 non-standard constraints.
