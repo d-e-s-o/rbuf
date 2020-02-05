@@ -25,7 +25,12 @@ impl<'b, T> Iterator for RingIter<'b, T> {
 
   fn next(&mut self) -> Option<Self::Item> {
     if self.next < self.next_back {
-      let elem = &self.buf.data[self.next % self.buf.len()];
+      let idx = self.next % self.buf.len();
+      #[cfg(debug_assertions)]
+      let elem = &self.buf.data[idx];
+      #[cfg(not(debug_assertions))]
+      let elem = unsafe { self.buf.data.get_unchecked(idx) };
+
       self.next += 1;
       Some(elem)
     } else {
@@ -45,7 +50,13 @@ impl<'b, T> DoubleEndedIterator for RingIter<'b, T> {
     if self.next < self.next_back {
       debug_assert!(self.next_back > 0);
       self.next_back -= 1;
-      let elem = &self.buf.data[self.next_back % self.buf.len()];
+
+      let idx = self.next_back % self.buf.len();
+      #[cfg(debug_assertions)]
+      let elem = &self.buf.data[idx];
+      #[cfg(not(debug_assertions))]
+      let elem = unsafe { self.buf.data.get_unchecked(idx) };
+
       Some(elem)
     } else {
       None
@@ -138,7 +149,12 @@ impl<T> RingBuf<T> {
   /// Retrieve the current "front" element, i.e., the element that got
   /// inserted most recently.
   pub fn front(&self) -> &T {
-    &self.data[self.front_idx()]
+    #[cfg(debug_assertions)]
+    let front = &self.data[self.front_idx()];
+    #[cfg(not(debug_assertions))]
+    let front = unsafe { self.data.get_unchecked(self.front_idx()) };
+
+    front
   }
 
   /// Retrieve the current "front" index, i.e., the index of the element
@@ -159,7 +175,12 @@ impl<T> RingBuf<T> {
   /// Retrieve the current "back" element, i.e., the element that got
   /// inserted the furthest in the past.
   pub fn back(&self) -> &T {
-    &self.data[self.back_idx()]
+    #[cfg(debug_assertions)]
+    let back = &self.data[self.back_idx()];
+    #[cfg(not(debug_assertions))]
+    let back = unsafe { self.data.get_unchecked(self.back_idx()) };
+
+    back
   }
 
   /// Retrieve the current "back" index, i.e., the index of the element
@@ -181,7 +202,14 @@ impl<T> RingBuf<T> {
     let next = self.next;
     let len = self.data.len();
     debug_assert!(next < len, "next: {}, len: {}", next, len);
-    self.data[next] = elem;
+    #[cfg(debug_assertions)]
+    {
+      self.data[next] = elem;
+    }
+    #[cfg(not(debug_assertions))]
+    unsafe {
+      *self.data.get_unchecked_mut(next) = elem;
+    }
     self.next = (next + 1) % len;
   }
 
@@ -216,14 +244,24 @@ impl<T> Index<usize> for RingBuf<T> {
 
   fn index(&self, idx: usize) -> &Self::Output {
     let idx = (self.back_idx() + idx) % self.len();
-    self.data.index(idx)
+    #[cfg(debug_assertions)]
+    let elem = self.data.index(idx);
+    #[cfg(not(debug_assertions))]
+    let elem = unsafe { self.data.get_unchecked(idx) };
+
+    elem
   }
 }
 
 impl<T> IndexMut<usize> for RingBuf<T> {
   fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
     let idx = (self.back_idx() + idx) % self.len();
-    self.data.index_mut(idx)
+    #[cfg(debug_assertions)]
+    let elem = self.data.index_mut(idx);
+    #[cfg(not(debug_assertions))]
+    let elem = unsafe { self.data.get_unchecked_mut(idx) };
+
+    elem
   }
 }
 
