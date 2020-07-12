@@ -124,6 +124,7 @@ where
   }
 }
 
+#[allow(clippy::len_without_is_empty)]
 impl<T> RingBuf<T> {
   /// Create a new `RingBuf` with data from a `Vec`.
   ///
@@ -133,7 +134,7 @@ impl<T> RingBuf<T> {
   /// Note furthermore that the provided `Vec` is required to contain at
   /// least a single element.
   pub fn from_vec(vec: Vec<T>) -> Self {
-    assert!(vec.len() > 0);
+    assert!(!vec.is_empty());
 
     Self {
       data: vec.into_boxed_slice(),
