@@ -1,5 +1,7 @@
 Unreleased
 ----------
+- Tagged most of the methods as '#[inline]' to allow for better inlining
+  by clients
 - Enabled CI pipeline comprising building, testing, linting, and
   coverage collection of the project
   - Added badges indicating pipeline status and code coverage percentage

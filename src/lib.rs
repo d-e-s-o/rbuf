@@ -1,4 +1,4 @@
-// Copyright (C) 2020 Daniel Mueller <deso@posteo.net>
+// Copyright (C) 2020-2021 Daniel Mueller <deso@posteo.net>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 use std::iter::DoubleEndedIterator;
@@ -23,6 +23,7 @@ pub struct RingIter<'b, T> {
 impl<'b, T> Iterator for RingIter<'b, T> {
   type Item = &'b T;
 
+  #[inline]
   fn next(&mut self) -> Option<Self::Item> {
     if self.next < self.next_back {
       let idx = self.next % self.buf.len();
@@ -39,6 +40,7 @@ impl<'b, T> Iterator for RingIter<'b, T> {
   }
 
   /// Return the bounds on the remaining length of the iterator.
+  #[inline]
   fn size_hint(&self) -> (usize, Option<usize>) {
     let len = self.next_back - self.next;
     (len, Some(len))
@@ -46,6 +48,7 @@ impl<'b, T> Iterator for RingIter<'b, T> {
 }
 
 impl<'b, T> DoubleEndedIterator for RingIter<'b, T> {
+  #[inline]
   fn next_back(&mut self) -> Option<Self::Item> {
     if self.next < self.next_back {
       debug_assert!(self.next_back > 0);
@@ -143,12 +146,14 @@ impl<T> RingBuf<T> {
   }
 
   /// Retrieve the ring buffer's length.
+  #[inline]
   pub const fn len(&self) -> usize {
     self.data.len()
   }
 
   /// Retrieve the current "front" element, i.e., the element that got
   /// inserted most recently.
+  #[inline]
   pub fn front(&self) -> &T {
     #[cfg(debug_assertions)]
     let front = &self.data[self.front_idx()];
@@ -165,6 +170,7 @@ impl<T> RingBuf<T> {
   /// underlying slice using `deref`. In particular, the index returned
   /// by this method should not be confused with those as expected by
   /// our `Index` implementation (as accessible through bracket syntax).
+  #[inline]
   pub fn front_idx(&self) -> usize {
     if self.next == 0 {
       self.len() - 1
@@ -175,6 +181,7 @@ impl<T> RingBuf<T> {
 
   /// Retrieve the current "back" element, i.e., the element that got
   /// inserted the furthest in the past.
+  #[inline]
   pub fn back(&self) -> &T {
     #[cfg(debug_assertions)]
     let back = &self.data[self.back_idx()];
@@ -191,6 +198,7 @@ impl<T> RingBuf<T> {
   /// underlying slice using `deref`. In particular, the index returned
   /// by this method should not be confused with those as expected by
   /// our `Index` implementation (as accessible through bracket syntax).
+  #[inline]
   pub fn back_idx(&self) -> usize {
     self.next
   }
@@ -199,6 +207,7 @@ impl<T> RingBuf<T> {
   ///
   /// This operation will evict the ring buffer's least recently added
   /// element (i.e., the element at the back).
+  #[inline]
   pub fn push_front(&mut self, elem: T) {
     let next = self.next;
     let len = self.data.len();
@@ -215,6 +224,7 @@ impl<T> RingBuf<T> {
   }
 
   /// Retrieve an iterator over the elements of the ring buffer.
+  #[inline]
   pub const fn iter(&self) -> RingIter<'_, T> {
     RingIter {
       buf: self,
@@ -229,12 +239,14 @@ impl<T> RingBuf<T> {
 impl<T> Deref for RingBuf<T> {
   type Target = [T];
 
+  #[inline]
   fn deref(&self) -> &Self::Target {
     self.data.deref()
   }
 }
 
 impl<T> DerefMut for RingBuf<T> {
+  #[inline]
   fn deref_mut(&mut self) -> &mut Self::Target {
     self.data.deref_mut()
   }
@@ -243,6 +255,7 @@ impl<T> DerefMut for RingBuf<T> {
 impl<T> Index<usize> for RingBuf<T> {
   type Output = T;
 
+  #[inline]
   fn index(&self, idx: usize) -> &Self::Output {
     let idx = (self.back_idx() + idx) % self.len();
     #[cfg(debug_assertions)]
@@ -255,6 +268,7 @@ impl<T> Index<usize> for RingBuf<T> {
 }
 
 impl<T> IndexMut<usize> for RingBuf<T> {
+  #[inline]
   fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
     let idx = (self.back_idx() + idx) % self.len();
     #[cfg(debug_assertions)]
