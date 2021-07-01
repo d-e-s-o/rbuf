@@ -1,5 +1,5 @@
-Unreleased
-----------
+0.1.2
+-----
 - Tagged most of the methods as '#[inline]' to allow for better inlining
   by clients
 - Enabled CI pipeline comprising building, testing, linting, and
