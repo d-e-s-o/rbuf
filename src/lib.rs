@@ -28,7 +28,7 @@ impl<'b, T> Iterator for RingIter<'b, T> {
     if self.next < self.next_back {
       let idx = self.next % self.buf.len();
       #[cfg(debug_assertions)]
-      let elem = &self.buf.data[idx];
+      let elem = self.buf.data.get(idx).unwrap();
       #[cfg(not(debug_assertions))]
       let elem = unsafe { self.buf.data.get_unchecked(idx) };
 
@@ -56,7 +56,7 @@ impl<'b, T> DoubleEndedIterator for RingIter<'b, T> {
 
       let idx = self.next_back % self.buf.len();
       #[cfg(debug_assertions)]
-      let elem = &self.buf.data[idx];
+      let elem = self.buf.data.get(idx).unwrap();
       #[cfg(not(debug_assertions))]
       let elem = unsafe { self.buf.data.get_unchecked(idx) };
 
@@ -156,7 +156,7 @@ impl<T> RingBuf<T> {
   #[inline]
   pub fn front(&self) -> &T {
     #[cfg(debug_assertions)]
-    let front = &self.data[self.front_idx()];
+    let front = self.data.get(self.front_idx()).unwrap();
     #[cfg(not(debug_assertions))]
     let front = unsafe { self.data.get_unchecked(self.front_idx()) };
 
@@ -184,7 +184,7 @@ impl<T> RingBuf<T> {
   #[inline]
   pub fn back(&self) -> &T {
     #[cfg(debug_assertions)]
-    let back = &self.data[self.back_idx()];
+    let back = self.data.get(self.back_idx()).unwrap();
     #[cfg(not(debug_assertions))]
     let back = unsafe { self.data.get_unchecked(self.back_idx()) };
 
@@ -214,7 +214,7 @@ impl<T> RingBuf<T> {
     debug_assert!(next < len, "next: {}, len: {}", next, len);
     #[cfg(debug_assertions)]
     {
-      self.data[next] = elem;
+      *self.data.get_mut(next).unwrap() = elem;
     }
     #[cfg(not(debug_assertions))]
     unsafe {
@@ -259,7 +259,7 @@ impl<T> Index<usize> for RingBuf<T> {
   fn index(&self, idx: usize) -> &Self::Output {
     let idx = (self.back_idx() + idx) % self.len();
     #[cfg(debug_assertions)]
-    let elem = self.data.index(idx);
+    let elem = self.data.get(idx).unwrap();
     #[cfg(not(debug_assertions))]
     let elem = unsafe { self.data.get_unchecked(idx) };
 
@@ -272,7 +272,7 @@ impl<T> IndexMut<usize> for RingBuf<T> {
   fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
     let idx = (self.back_idx() + idx) % self.len();
     #[cfg(debug_assertions)]
-    let elem = self.data.index_mut(idx);
+    let elem = self.data.get_mut(idx).unwrap();
     #[cfg(not(debug_assertions))]
     let elem = unsafe { self.data.get_unchecked_mut(idx) };
 
