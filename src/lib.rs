@@ -155,10 +155,11 @@ impl<T> RingBuf<T> {
   /// inserted most recently.
   #[inline]
   pub fn front(&self) -> &T {
+    let idx = self.front_idx();
     #[cfg(debug_assertions)]
-    let front = self.data.get(self.front_idx()).unwrap();
+    let front = self.data.get(idx).unwrap();
     #[cfg(not(debug_assertions))]
-    let front = unsafe { self.data.get_unchecked(self.front_idx()) };
+    let front = unsafe { self.data.get_unchecked(idx) };
 
     front
   }
@@ -183,10 +184,11 @@ impl<T> RingBuf<T> {
   /// inserted the furthest in the past.
   #[inline]
   pub fn back(&self) -> &T {
+    let idx = self.back_idx();
     #[cfg(debug_assertions)]
-    let back = self.data.get(self.back_idx()).unwrap();
+    let back = self.data.get(idx).unwrap();
     #[cfg(not(debug_assertions))]
-    let back = unsafe { self.data.get_unchecked(self.back_idx()) };
+    let back = unsafe { self.data.get_unchecked(idx) };
 
     back
   }
