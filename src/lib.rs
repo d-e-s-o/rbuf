@@ -30,6 +30,7 @@ impl<'b, T> Iterator for RingIter<'b, T> {
       #[cfg(debug_assertions)]
       let elem = self.buf.data.get(idx).unwrap();
       #[cfg(not(debug_assertions))]
+      // SAFETY: The index is within the bounds of the underlying slice.
       let elem = unsafe { self.buf.data.get_unchecked(idx) };
 
       self.next += 1;
@@ -58,6 +59,7 @@ impl<'b, T> DoubleEndedIterator for RingIter<'b, T> {
       #[cfg(debug_assertions)]
       let elem = self.buf.data.get(idx).unwrap();
       #[cfg(not(debug_assertions))]
+      // SAFETY: The index is within the bounds of the underlying slice.
       let elem = unsafe { self.buf.data.get_unchecked(idx) };
 
       Some(elem)
@@ -159,6 +161,7 @@ impl<T> RingBuf<T> {
     #[cfg(debug_assertions)]
     let front = self.data.get(idx).unwrap();
     #[cfg(not(debug_assertions))]
+    // SAFETY: The index is within the bounds of the underlying slice.
     let front = unsafe { self.data.get_unchecked(idx) };
 
     front
@@ -188,6 +191,7 @@ impl<T> RingBuf<T> {
     #[cfg(debug_assertions)]
     let back = self.data.get(idx).unwrap();
     #[cfg(not(debug_assertions))]
+    // SAFETY: The index is within the bounds of the underlying slice.
     let back = unsafe { self.data.get_unchecked(idx) };
 
     back
@@ -219,6 +223,7 @@ impl<T> RingBuf<T> {
       *self.data.get_mut(next).unwrap() = elem;
     }
     #[cfg(not(debug_assertions))]
+    // SAFETY: The index is within the bounds of the underlying slice.
     unsafe {
       *self.data.get_unchecked_mut(next) = elem;
     }
@@ -263,6 +268,7 @@ impl<T> Index<usize> for RingBuf<T> {
     #[cfg(debug_assertions)]
     let elem = self.data.get(idx).unwrap();
     #[cfg(not(debug_assertions))]
+    // SAFETY: The index is within the bounds of the underlying slice.
     let elem = unsafe { self.data.get_unchecked(idx) };
 
     elem
@@ -276,6 +282,7 @@ impl<T> IndexMut<usize> for RingBuf<T> {
     #[cfg(debug_assertions)]
     let elem = self.data.get_mut(idx).unwrap();
     #[cfg(not(debug_assertions))]
+    // SAFETY: The index is within the bounds of the underlying slice.
     let elem = unsafe { self.data.get_unchecked_mut(idx) };
 
     elem
