@@ -12,8 +12,8 @@ use std::ops::IndexMut;
 /// An iterator over a `RingBuf`.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct RingIter<'b, T> {
-  /// The actual ring buffer we work with.
-  buf: &'b RingBuf<T>,
+  /// The actual ring buffer data we work with.
+  buf: &'b [T],
   /// The index of the next element to yield in forward direction.
   next: usize,
   /// The index of the next element to yield in backward direction.
@@ -28,10 +28,10 @@ impl<'b, T> Iterator for RingIter<'b, T> {
     if self.next < self.next_back {
       let idx = self.next % self.buf.len();
       #[cfg(debug_assertions)]
-      let elem = self.buf.data.get(idx).unwrap();
+      let elem = self.buf.get(idx).unwrap();
       #[cfg(not(debug_assertions))]
       // SAFETY: The index is within the bounds of the underlying slice.
-      let elem = unsafe { self.buf.data.get_unchecked(idx) };
+      let elem = unsafe { self.buf.get_unchecked(idx) };
 
       self.next += 1;
       Some(elem)
@@ -57,10 +57,10 @@ impl<'b, T> DoubleEndedIterator for RingIter<'b, T> {
 
       let idx = self.next_back % self.buf.len();
       #[cfg(debug_assertions)]
-      let elem = self.buf.data.get(idx).unwrap();
+      let elem = self.buf.get(idx).unwrap();
       #[cfg(not(debug_assertions))]
       // SAFETY: The index is within the bounds of the underlying slice.
-      let elem = unsafe { self.buf.data.get_unchecked(idx) };
+      let elem = unsafe { self.buf.get_unchecked(idx) };
 
       Some(elem)
     } else {
@@ -234,7 +234,7 @@ impl<T> RingBuf<T> {
   #[inline]
   pub const fn iter(&self) -> RingIter<'_, T> {
     RingIter {
-      buf: self,
+      buf: &self.data,
       next: self.next,
       // By adding our buffer's length here we ensure that the
       // iterator's `next` is always less or equal to `next_back`.
