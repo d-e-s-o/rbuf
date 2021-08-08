@@ -20,6 +20,19 @@ pub struct RingIter<'b, T> {
   next_back: usize,
 }
 
+impl<'b, T> RingIter<'b, T> {
+  /// Create a new `RingIter` over the given ring buffer data.
+  const fn new(buf: &'b [T], next: usize) -> Self {
+    Self {
+      buf,
+      next,
+      // By adding our buffer's length here we ensure that the
+      // iterator's `next` is always less or equal to `next_back`.
+      next_back: next + buf.len(),
+    }
+  }
+}
+
 impl<'b, T> Iterator for RingIter<'b, T> {
   type Item = &'b T;
 
@@ -233,13 +246,7 @@ impl<T> RingBuf<T> {
   /// Retrieve an iterator over the elements of the ring buffer.
   #[inline]
   pub const fn iter(&self) -> RingIter<'_, T> {
-    RingIter {
-      buf: &self.data,
-      next: self.next,
-      // By adding our buffer's length here we ensure that the
-      // iterator's `next` is always less or equal to `next_back`.
-      next_back: self.next + self.len(),
-    }
+    RingIter::new(&self.data, self.next)
   }
 }
 
