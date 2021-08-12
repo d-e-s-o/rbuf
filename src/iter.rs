@@ -40,11 +40,9 @@ macro_rules! iterator {
       fn next(&mut self) -> Option<Self::Item> {
         if self.next < self.next_back {
           let idx = self.next % self.buf.len();
-          #[cfg(debug_assertions)]
-          let elem = self.buf.get(idx).unwrap();
-          #[cfg(not(debug_assertions))]
+          debug_assert!(idx < self.buf.len());
           // SAFETY: The index is within the bounds of the underlying slice.
-          let elem = unsafe { self.buf.get_unchecked(idx) };
+          let elem = unsafe { &*self.buf.as_ptr().add(idx) };
 
           self.next += 1;
           Some(elem)
@@ -69,11 +67,9 @@ macro_rules! iterator {
           self.next_back -= 1;
 
           let idx = self.next_back % self.buf.len();
-          #[cfg(debug_assertions)]
-          let elem = self.buf.get(idx).unwrap();
-          #[cfg(not(debug_assertions))]
+          debug_assert!(idx < self.buf.len());
           // SAFETY: The index is within the bounds of the underlying slice.
-          let elem = unsafe { self.buf.get_unchecked(idx) };
+          let elem = unsafe { &*self.buf.as_ptr().add(idx) };
 
           Some(elem)
         } else {
