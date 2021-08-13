@@ -7,13 +7,15 @@ use std::iter::FusedIterator;
 
 macro_rules! iterator {
   (
-    struct $name:ident,
+    $(#[$meta:meta])* struct $name:ident,
+    {$( $const_:tt )?},
+    {$( $mut_:tt )?},
+    $as_ptr:tt,
   ) => {
-    /// An iterator over a `RingBuf`.
-    #[derive(Copy, Clone, Debug, PartialEq)]
+    $(#[$meta])*
     pub struct $name<'b, T> {
       /// The actual ring buffer data we work with.
-      buf: &'b [T],
+      buf: &'b $( $mut_ )? [T],
       /// The index of the next element to yield in forward direction.
       next: usize,
       /// The index of the next element to yield in backward direction.
@@ -22,7 +24,7 @@ macro_rules! iterator {
 
     impl<'b, T> $name<'b, T> {
       /// Create a new iterator over the given ring buffer data.
-      pub(crate) const fn new(buf: &'b [T], next: usize) -> Self {
+      pub(crate) $( $const_ )? fn new(buf: &'b $( $mut_ )? [T], next: usize) -> Self {
         Self {
           buf,
           next,
@@ -34,7 +36,7 @@ macro_rules! iterator {
     }
 
     impl<'b, T> Iterator for $name<'b, T> {
-      type Item = &'b T;
+      type Item = &'b $( $mut_ )? T;
 
       #[inline]
       fn next(&mut self) -> Option<Self::Item> {
@@ -42,7 +44,11 @@ macro_rules! iterator {
           let idx = self.next % self.buf.len();
           debug_assert!(idx < self.buf.len());
           // SAFETY: The index is within the bounds of the underlying slice.
-          let elem = unsafe { &*self.buf.as_ptr().add(idx) };
+          //         For mutable iterators, specifically, it is also
+          //         impossible for the iterator to yield the same
+          //         element multiple times (which would violate
+          //         exclusive mutable reference rules).
+          let elem = unsafe { & $( $mut_ )? * self.buf.$as_ptr().add(idx) };
 
           self.next += 1;
           Some(elem)
@@ -69,7 +75,11 @@ macro_rules! iterator {
           let idx = self.next_back % self.buf.len();
           debug_assert!(idx < self.buf.len());
           // SAFETY: The index is within the bounds of the underlying slice.
-          let elem = unsafe { &*self.buf.as_ptr().add(idx) };
+          //         For mutable iterators, specifically, it is also
+          //         impossible for the iterator to yield the same
+          //         element multiple times (which would violate
+          //         exclusive mutable reference rules).
+          let elem = unsafe { & $( $mut_ )? * self.buf.$as_ptr().add(idx) };
 
           Some(elem)
         } else {
@@ -84,4 +94,8 @@ macro_rules! iterator {
   };
 }
 
-iterator! { struct RingIter, }
+iterator! {
+  /// An iterator over a `RingBuf`.
+  #[derive(Copy, Clone, Debug, PartialEq)]
+  struct RingIter, {const}, {}, as_ptr,
+}
