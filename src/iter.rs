@@ -25,12 +25,13 @@ macro_rules! iterator {
     impl<'b, T> $name<'b, T> {
       /// Create a new iterator over the given ring buffer data.
       pub(crate) $( $const_ )? fn new(buf: &'b $( $mut_ )? [T], next: usize) -> Self {
+        let len = buf.len();
         Self {
           buf,
           next,
           // By adding our buffer's length here we ensure that the
           // iterator's `next` is always less or equal to `next_back`.
-          next_back: next + buf.len(),
+          next_back: next + len,
         }
       }
     }
@@ -98,4 +99,9 @@ iterator! {
   /// An iterator over a `RingBuf`.
   #[derive(Copy, Clone, Debug, PartialEq)]
   struct RingIter, {const}, {}, as_ptr,
+}
+iterator! {
+  /// A mutable iterator over a `RingBuf`.
+  #[derive(Debug, PartialEq)]
+  struct RingIterMut, {}, {mut}, as_mut_ptr,
 }

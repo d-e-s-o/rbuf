@@ -1,4 +1,4 @@
-// Copyright (C) 2020 Daniel Mueller <deso@posteo.net>
+// Copyright (C) 2020-2021 Daniel Mueller <deso@posteo.net>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 use rbuf::ring_buf;
@@ -69,6 +69,15 @@ fn iter_next() {
 
   buf.push_front(2);
   assert_equal(&buf, vec![13, 0, 7, 2]);
+}
+
+/// Test that we can mutate elements as we iterate over them.
+#[test]
+fn mutating_iter() {
+  let mut buf = ring_buf![1, 2, 3, 4];
+  buf.iter_mut().for_each(|x| *x += 2);
+
+  assert_eq!(buf, ring_buf![3, 4, 5, 6]);
 }
 
 #[test]

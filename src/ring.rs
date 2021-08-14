@@ -7,6 +7,7 @@ use std::ops::Index;
 use std::ops::IndexMut;
 
 use crate::RingIter;
+use crate::RingIterMut;
 
 
 /// A ring buffer for arbitrary but default-initializable data.
@@ -158,6 +159,12 @@ impl<T> RingBuf<T> {
   #[inline]
   pub const fn iter(&self) -> RingIter<'_, T> {
     RingIter::new(&self.data, self.next)
+  }
+
+  /// Retrieve a mutating iterator over the elements of the ring buffer.
+  #[inline]
+  pub fn iter_mut(&mut self) -> RingIterMut<'_, T> {
+    RingIterMut::new(&mut self.data, self.next)
   }
 }
 

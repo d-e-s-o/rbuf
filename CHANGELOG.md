@@ -1,3 +1,8 @@
+Unreleased
+----------
+- Added support for mutating iteration via `RingIterMut`
+
+
 0.1.2
 -----
 - Tagged most of the methods as '#[inline]' to allow for better inlining
