@@ -1,6 +1,7 @@
 // Copyright (C) 2021 Daniel Mueller <deso@posteo.net>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+use std::mem::size_of;
 use std::ops::Deref;
 use std::ops::DerefMut;
 use std::ops::Index;
@@ -164,6 +165,12 @@ impl<T> RingBuf<T> {
   /// Retrieve a mutating iterator over the elements of the ring buffer.
   #[inline]
   pub fn iter_mut(&mut self) -> RingIterMut<'_, T> {
+    assert_ne!(
+      size_of::<T>(),
+      0,
+      "Mutable iterators are not supported on ring buffers over zero sized types"
+    );
+
     RingIterMut::new(&mut self.data, self.next)
   }
 }

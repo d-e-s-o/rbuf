@@ -71,6 +71,17 @@ fn iter_next() {
   assert_equal(&buf, vec![13, 0, 7, 2]);
 }
 
+/// Check that users cannot create a mutable iterator over a ring buffer
+/// containing objects of a zero sized type.
+#[test]
+#[should_panic(
+  expected = "Mutable iterators are not supported on ring buffers over zero sized types"
+)]
+fn no_mutable_iterator_with_zst() {
+  let mut buf = ring_buf![()];
+  let _it = buf.iter_mut();
+}
+
 /// Test that we can mutate elements as we iterate over them.
 #[test]
 fn mutating_iter() {

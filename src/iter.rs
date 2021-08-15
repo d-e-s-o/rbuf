@@ -48,7 +48,11 @@ macro_rules! iterator {
           //         For mutable iterators, specifically, it is also
           //         impossible for the iterator to yield the same
           //         element multiple times (which would violate
-          //         exclusive mutable reference rules).
+          //         exclusive mutable reference rules). Furthermore,
+          //         mutable iterators do not support zero sized types
+          //         (prevented at run time), which would violate Rust's
+          //         exclusive mutable reference rule as well with our
+          //         current implementation.
           let elem = unsafe { & $( $mut_ )? * self.buf.$as_ptr().add(idx) };
 
           self.next += 1;
@@ -79,7 +83,11 @@ macro_rules! iterator {
           //         For mutable iterators, specifically, it is also
           //         impossible for the iterator to yield the same
           //         element multiple times (which would violate
-          //         exclusive mutable reference rules).
+          //         exclusive mutable reference rules). Furthermore,
+          //         mutable iterators do not support zero sized types
+          //         (prevented at run time), which would violate Rust's
+          //         exclusive mutable reference rule as well with our
+          //         current implementation.
           let elem = unsafe { & $( $mut_ )? * self.buf.$as_ptr().add(idx) };
 
           Some(elem)
