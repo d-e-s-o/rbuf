@@ -65,6 +65,11 @@ macro_rules! iterator {
       /// Return the bounds on the remaining length of the iterator.
       #[inline]
       fn size_hint(&self) -> (usize, Option<usize>) {
+        // `next_back` should always be greater or equal to `next`
+        // because it is initialized to `next` plus the slice's length
+        // upon construction.
+        debug_assert!(self.next_back >= self.next);
+
         let len = self.next_back - self.next;
         (len, Some(len))
       }

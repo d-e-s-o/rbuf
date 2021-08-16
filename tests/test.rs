@@ -11,20 +11,47 @@ fn buf_len() {
   assert_eq!(buf.len(), 13);
 }
 
+/// Check that the provided size hint is correct.
 #[test]
 fn iter_size_hint() {
-  let buf = RingBuf::<usize>::new(3);
+  fn test(buf: &RingBuf<usize>) {
+    let mut it = buf.iter();
+    assert_eq!(it.size_hint(), (3, Some(3)));
+    let _ = it.next();
+    assert_eq!(it.size_hint(), (2, Some(2)));
+    let _ = it.next();
+    assert_eq!(it.size_hint(), (1, Some(1)));
+    let _ = it.next();
+    assert_eq!(it.size_hint(), (0, Some(0)));
+    let _ = it.next();
+    assert_eq!(it.size_hint(), (0, Some(0)));
 
-  let mut it = buf.iter();
-  assert_eq!(it.size_hint(), (3, Some(3)));
-  let _ = it.next();
-  assert_eq!(it.size_hint(), (2, Some(2)));
-  let _ = it.next();
-  assert_eq!(it.size_hint(), (1, Some(1)));
-  let _ = it.next();
-  assert_eq!(it.size_hint(), (0, Some(0)));
-  let _ = it.next();
-  assert_eq!(it.size_hint(), (0, Some(0)));
+    let mut it = buf.iter();
+    assert_eq!(it.size_hint(), (3, Some(3)));
+    let _ = it.next_back();
+    assert_eq!(it.size_hint(), (2, Some(2)));
+    let _ = it.next_back();
+    assert_eq!(it.size_hint(), (1, Some(1)));
+    let _ = it.next_back();
+    assert_eq!(it.size_hint(), (0, Some(0)));
+    let _ = it.next_back();
+    assert_eq!(it.size_hint(), (0, Some(0)));
+  }
+
+  let mut buf = RingBuf::<usize>::new(3);
+  test(&buf);
+
+  buf.push_front(32);
+  test(&buf);
+
+  buf.push_front(73);
+  test(&buf);
+
+  buf.push_front(9);
+  test(&buf);
+
+  buf.push_front(31);
+  test(&buf);
 }
 
 #[test]
