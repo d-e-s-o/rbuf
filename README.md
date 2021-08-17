@@ -2,7 +2,7 @@
 [![coverage](https://gitlab.com/d-e-s-o/rbuf/badges/master/coverage.svg)](https://gitlab.com/d-e-s-o/rbuf/-/jobs/artifacts/master/file/kcov/kcov-merged/index.html?job=coverage:kcov)
 [![crates.io](https://img.shields.io/crates/v/rbuf.svg)](https://crates.io/crates/rbuf)
 [![Docs](https://docs.rs/rbuf/badge.svg)](https://docs.rs/rbuf)
-[![rustc](https://img.shields.io/badge/rustc-1.39+-blue.svg)](https://blog.rust-lang.org/2019/11/07/Rust-1.39.0.html)
+[![rustc](https://img.shields.io/badge/rustc-1.40+-blue.svg)](https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html)
 
 rbuf
 ====

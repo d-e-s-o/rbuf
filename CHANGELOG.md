@@ -1,6 +1,7 @@
 Unreleased
 ----------
 - Added support for mutating iteration via `RingIterMut`
+- Bumped minimum supported Rust version to `1.40`
 
 
 0.1.2
