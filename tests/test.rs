@@ -135,6 +135,7 @@ fn double_ended_iter() {
 }
 
 #[test]
+#[allow(clippy::cognitive_complexity)]
 fn front_back() {
   let mut buf = RingBuf::<usize>::new(3);
 
@@ -166,6 +167,20 @@ fn front_back() {
   assert_eq!(buf.front_idx(), 0);
   assert_eq!(*buf.back(), 5);
   assert_eq!(buf.back_idx(), 1);
+
+  let x = buf.pop_front();
+  assert_eq!(x, 10);
+  assert_eq!(*buf.front(), 3);
+  assert_eq!(buf.front_idx(), 2);
+  assert_eq!(*buf.back(), 0);
+  assert_eq!(buf.back_idx(), 0);
+
+  let x = buf.pop_front();
+  assert_eq!(x, 3);
+  assert_eq!(*buf.front(), 5);
+  assert_eq!(buf.front_idx(), 1);
+  assert_eq!(*buf.back(), 0);
+  assert_eq!(buf.back_idx(), 2);
 }
 
 #[test]

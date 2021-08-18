@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 use std::mem::size_of;
+use std::mem::take;
 use std::ops::Deref;
 use std::ops::DerefMut;
 use std::ops::Index;
@@ -52,6 +53,29 @@ where
     vec.resize_with(len, Default::default);
 
     Self::from_vec(vec)
+  }
+
+  /// Pop the most recently added element from the ring buffer.
+  ///
+  /// This operation will remove the ring buffer's most recently added
+  /// element and replace it with the default value of `T`. The formerly
+  /// second most recently added element will be the ring buffer's new
+  /// "front".
+  pub fn pop_front(&mut self) -> T {
+    let idx = self.front_idx();
+    self.next = if self.next == 0 {
+      self.len() - 1
+    } else {
+      self.next - 1
+    };
+
+    #[cfg(debug_assertions)]
+    let front = take(self.data.get_mut(idx).unwrap());
+    #[cfg(not(debug_assertions))]
+    // SAFETY: The index is within the bounds of the underlying slice.
+    let front = take(unsafe { self.data.get_unchecked_mut(idx) });
+
+    front
   }
 }
 
@@ -138,7 +162,9 @@ impl<T> RingBuf<T> {
   /// Push an element into the ring buffer.
   ///
   /// This operation will evict the ring buffer's least recently added
-  /// element (i.e., the element at the back).
+  /// element (i.e., the element at the back) and replace it with the
+  /// provided one. The newly pushed element will be considered the ring
+  /// buffer's new "front".
   #[inline]
   pub fn push_front(&mut self, elem: T) {
     let next = self.next;

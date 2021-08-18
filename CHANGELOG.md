@@ -1,6 +1,7 @@
 Unreleased
 ----------
 - Added support for mutating iteration via `RingIterMut`
+- Introduced `RingBuf::pop_front` method
 - Bumped minimum supported Rust version to `1.40`
 
 
