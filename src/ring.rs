@@ -117,6 +117,20 @@ impl<T> RingBuf<T> {
     front
   }
 
+  /// Retrieve the current "front" element, i.e., the element that got
+  /// inserted most recently.
+  #[inline]
+  pub fn front_mut(&mut self) -> &mut T {
+    let idx = self.front_idx();
+    #[cfg(debug_assertions)]
+    let front = self.data.get_mut(idx).unwrap();
+    #[cfg(not(debug_assertions))]
+    // SAFETY: The index is within the bounds of the underlying slice.
+    let front = unsafe { self.data.get_unchecked_mut(idx) };
+
+    front
+  }
+
   /// Retrieve the current "front" index, i.e., the index of the element
   /// that got inserted most recently.
   ///
@@ -143,6 +157,20 @@ impl<T> RingBuf<T> {
     #[cfg(not(debug_assertions))]
     // SAFETY: The index is within the bounds of the underlying slice.
     let back = unsafe { self.data.get_unchecked(idx) };
+
+    back
+  }
+
+  /// Retrieve the current "back" element, i.e., the element that got
+  /// inserted the furthest in the past.
+  #[inline]
+  pub fn back_mut(&mut self) -> &mut T {
+    let idx = self.back_idx();
+    #[cfg(debug_assertions)]
+    let back = self.data.get_mut(idx).unwrap();
+    #[cfg(not(debug_assertions))]
+    // SAFETY: The index is within the bounds of the underlying slice.
+    let back = unsafe { self.data.get_unchecked_mut(idx) };
 
     back
   }
