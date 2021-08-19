@@ -77,6 +77,11 @@ where
 
     front
   }
+
+  /// Convert the `RingBuf` into a boxed slice of its contents.
+  pub fn into_boxed_slice(self) -> Box<[T]> {
+    self.data
+  }
 }
 
 #[allow(clippy::len_without_is_empty)]

@@ -3,6 +3,7 @@ Unreleased
 - Added support for mutating iteration via `RingIterMut`
 - Introduced `RingBuf::pop_front` method
 - Introduced `RingBuf::front_mut` and `RingBuf::back_mut` methods
+- Introduced `RingBuf::into_boxed_slice` method
 - Bumped minimum supported Rust version to `1.40`
 
 

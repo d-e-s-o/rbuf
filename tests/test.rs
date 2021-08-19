@@ -1,6 +1,8 @@
 // Copyright (C) 2020-2021 Daniel Mueller <deso@posteo.net>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+use std::ops::Deref as _;
+
 use rbuf::ring_buf;
 use rbuf::RingBuf;
 
@@ -232,4 +234,12 @@ fn buf_index() {
 fn ring_buf_macro() {
   let buf = ring_buf![3, 4, 5, 6];
   assert_eq!(buf.len(), 4);
+}
+
+/// Check that we can convert a ring buffer into a boxed slice.
+#[test]
+fn boxed_slice() {
+  let buf = ring_buf![3, 4, 5, 6];
+  let slice = buf.into_boxed_slice();
+  assert_eq!(slice.deref(), vec![3, 4, 5, 6].as_slice());
 }
