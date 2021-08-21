@@ -1,5 +1,5 @@
-Unreleased
-----------
+0.1.3
+-----
 - Added support for mutating iteration via `RingIterMut`
 - Introduced `RingBuf::pop_front` method
 - Introduced `RingBuf::front_mut` and `RingBuf::back_mut` methods
