@@ -1,3 +1,8 @@
+Unreleased
+----------
+- Added Miri stage to CI pipeline
+
+
 0.1.3
 -----
 - Added support for mutating iteration via `RingIterMut`

@@ -28,6 +28,14 @@ test:cargo:
   script:
   - cargo test --verbose
 
+test:miri:
+  stage: test
+  dependencies:
+  - build:cargo
+  script:
+  - rustup toolchain install nightly -c miri
+  - MIRIFLAGS="-Zmiri-disable-isolation" cargo +nightly miri test --verbose
+
 lint:clippy:
   stage: test
   dependencies:
