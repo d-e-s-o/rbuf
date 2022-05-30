@@ -1,5 +1,6 @@
 Unreleased
 ----------
+- Switched to using GitHub Actions as CI provider
 - Added Miri stage to CI pipeline
 
 

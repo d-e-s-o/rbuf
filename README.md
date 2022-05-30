@@ -1,5 +1,5 @@
-[![pipeline](https://gitlab.com/d-e-s-o/rbuf/badges/main/pipeline.svg)](https://gitlab.com/d-e-s-o/rbuf/commits/main)
-[![coverage](https://gitlab.com/d-e-s-o/rbuf/badges/main/coverage.svg)](https://gitlab.com/d-e-s-o/rbuf/-/jobs/artifacts/main/file/kcov/kcov-merged/index.html?job=coverage:kcov)
+[![pipeline](https://github.com/d-e-s-o/rbuf/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/d-e-s-o/rbuf/actions/workflows/ci.yml)
+[![coverage](https://codecov.io/gh/d-e-s-o/rbuf/branch/main/graph/badge.svg)](https://codecov.io/gh/d-e-s-o/rbuf)
 [![crates.io](https://img.shields.io/crates/v/rbuf.svg)](https://crates.io/crates/rbuf)
 [![Docs](https://docs.rs/rbuf/badge.svg)](https://docs.rs/rbuf)
 [![rustc](https://img.shields.io/badge/rustc-1.40+-blue.svg)](https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html)
