@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Daniel Mueller <deso@posteo.net>
-// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2020-2025 Daniel Mueller <deso@posteo.net>
+// SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 mod iter;
 mod ring;

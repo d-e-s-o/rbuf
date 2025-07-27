@@ -2,6 +2,7 @@ Unreleased
 ----------
 - Switched to using GitHub Actions as CI provider
 - Added Miri stage to CI pipeline
+- Relicensed project under terms of `Apache-2.0 OR MIT`
 
 
 0.1.3
