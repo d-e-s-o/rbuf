@@ -1,8 +1,10 @@
 Unreleased
 ----------
+- Switched to using Rust 2021 Edition
 - Switched to using GitHub Actions as CI provider
 - Added Miri stage to CI pipeline
 - Relicensed project under terms of `Apache-2.0 OR MIT`
+- Bumped minimum supported Rust version to `1.56`
 
 
 0.1.3
