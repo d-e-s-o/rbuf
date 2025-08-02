@@ -1,5 +1,5 @@
-Unreleased
-----------
+0.1.4
+-----
 - Switched to using Rust 2021 Edition
 - Switched to using GitHub Actions as CI provider
 - Added Miri stage to CI pipeline
