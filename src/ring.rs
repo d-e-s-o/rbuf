@@ -222,6 +222,9 @@ impl<T> RingBuf<T> {
   }
 
   /// Retrieve a mutating iterator over the elements of the ring buffer.
+  ///
+  /// # Panics
+  /// This method panics when `T` is a zero sized type.
   #[inline]
   pub fn iter_mut(&mut self) -> RingIterMut<'_, T> {
     assert_ne!(
