@@ -29,7 +29,7 @@ use crate::RingIterMut;
 /// one. Furthermore, indexes wrap around at the ring buffer's end,
 /// meaning that an index of value `self.len()` would access the same
 /// element as index `0`.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RingBuf<T> {
   /// Our actual data.
   data: Box<[T]>,

@@ -1,6 +1,8 @@
 // Copyright (C) 2020-2025 Daniel Mueller <deso@posteo.net>
 // SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+//! Integration tests for the `rbuf` crate.
+
 use std::ops::Deref as _;
 
 use rbuf::ring_buf;

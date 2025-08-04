@@ -1,6 +1,9 @@
 // Copyright (C) 2020-2025 Daniel Mueller <deso@posteo.net>
 // SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+//! A library providing a general purpose ring buffer implementation
+//! with some non-standard constraints.
+
 mod iter;
 mod ring;
 
