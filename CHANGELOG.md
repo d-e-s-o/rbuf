@@ -1,3 +1,8 @@
+Unreleased
+----------
+- Added `Eq` impl for `RingBuf`, `RingIter`, and `RingIterMut`
+
+
 0.1.4
 -----
 - Switched to using Rust 2021 Edition
