@@ -12,6 +12,18 @@ pub use iter::RingIterMut;
 pub use ring::RingBuf;
 
 
+/// Create a [`RingBuf`] containing the provided arguments.
+///
+/// Similar to creation from a `Vec`, the last element in the provided
+/// list is considered the most recent one and forms the "front". The
+/// first element represents the "back".
+///
+/// ```rust
+/// # use rbuf::ring_buf;
+/// let mut buf = ring_buf![1, 2, 3, 4];
+/// assert_eq!(*buf.front(), 4);
+/// assert_eq!(*buf.back(), 1);
+/// ```
 #[macro_export]
 macro_rules! ring_buf [
   ($($x:expr), *) => {
