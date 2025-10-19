@@ -2,7 +2,7 @@
 [![coverage](https://codecov.io/gh/d-e-s-o/rbuf/branch/main/graph/badge.svg)](https://codecov.io/gh/d-e-s-o/rbuf)
 [![crates.io](https://img.shields.io/crates/v/rbuf.svg)](https://crates.io/crates/rbuf)
 [![Docs](https://docs.rs/rbuf/badge.svg)](https://docs.rs/rbuf)
-[![rustc](https://img.shields.io/badge/rustc-1.40+-blue.svg)](https://blog.rust-lang.org/2019/12/19/Rust-1.40.0.html)
+[![rustc](https://img.shields.io/badge/rustc-1.56+-blue.svg)](https://blog.rust-lang.org/2021/10/21/Rust-1.56.0/)
 
 rbuf
 ====
