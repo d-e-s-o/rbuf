@@ -7,6 +7,7 @@ rust-version = "1.56"
 license = "Apache-2.0 OR MIT"
 homepage = "https://github.com/d-e-s-o/rbuf"
 repository = "https://github.com/d-e-s-o/rbuf.git"
+documentation = "https://docs.rs/rbuf"
 readme = "README.md"
 description = """
 A general purpose ring buffer implementation with some non-standard constraints.
