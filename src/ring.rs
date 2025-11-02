@@ -63,11 +63,7 @@ where
   /// "front".
   pub fn pop_front(&mut self) -> T {
     let idx = self.front_idx();
-    self.next = if self.next == 0 {
-      self.len() - 1
-    } else {
-      self.next - 1
-    };
+    self.next = idx;
 
     #[cfg(debug_assertions)]
     let front = take(self.data.get_mut(idx).unwrap());
