@@ -7,11 +7,8 @@
 mod iter;
 mod ring;
 
-/// An iterator over the elements of a `RingBuf`.
 pub use iter::RingIter;
-/// A mutable iterator over the elements of a `RingBuf`.
 pub use iter::RingIterMut;
-/// A ring buffer for arbitrary but default-initializable data.
 pub use ring::RingBuf;
 
 

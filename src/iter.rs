@@ -109,12 +109,12 @@ macro_rules! iterator {
 }
 
 iterator! {
-  /// An iterator over a `RingBuf`.
+  /// An iterator over the elements of a `RingBuf`.
   #[derive(Copy, Clone, Debug, Eq, PartialEq)]
   struct RingIter, {const}, {}, as_ptr,
 }
 iterator! {
-  /// A mutable iterator over a `RingBuf`.
+  /// A mutable iterator over the elements of a `RingBuf`.
   #[derive(Debug, Eq, PartialEq)]
   struct RingIterMut, {}, {mut}, as_mut_ptr,
 }
