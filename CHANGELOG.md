@@ -1,5 +1,5 @@
-Unreleased
-----------
+0.1.5
+-----
 - Added `Eq` impl for `RingBuf`, `RingIter`, and `RingIterMut`
 
 
