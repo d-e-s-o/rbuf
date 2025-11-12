@@ -12,7 +12,7 @@ pub use iter::RingIterMut;
 pub use ring::RingBuf;
 
 
-/// Create a [`RingBuf`] containing the provided arguments.
+/// Create a [`RingBuf`] containing the provided elements.
 ///
 /// Similar to creation from a `Vec`, the last element in the provided
 /// list is considered the most recent one and forms the "front". The
