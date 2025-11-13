@@ -1,3 +1,9 @@
+Unreleased
+----------
+- Removed `Deref` and `DerefMut` impls from `RingBuf`
+- Removed `RingBuf::front_idx` and `RingBuf::back_idx` methods
+
+
 0.1.5
 -----
 - Added `Eq` impl for `RingBuf`, `RingIter`, and `RingIterMut`

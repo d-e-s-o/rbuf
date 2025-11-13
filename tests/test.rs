@@ -145,60 +145,46 @@ fn front_back() {
 
   assert_eq!(*buf.front(), 0);
   assert_eq!(*buf.front_mut(), 0);
-  assert_eq!(buf.front_idx(), 2);
   assert_eq!(*buf.back(), 0);
   assert_eq!(*buf.back_mut(), 0);
-  assert_eq!(buf.back_idx(), 0);
 
   buf.push_front(2);
   assert_eq!(*buf.front(), 2);
   assert_eq!(*buf.front_mut(), 2);
-  assert_eq!(buf.front_idx(), 0);
   assert_eq!(*buf.back(), 0);
   assert_eq!(*buf.back_mut(), 0);
-  assert_eq!(buf.back_idx(), 1);
 
   buf.push_front(5);
   assert_eq!(*buf.front(), 5);
   assert_eq!(*buf.front_mut(), 5);
-  assert_eq!(buf.front_idx(), 1);
   assert_eq!(*buf.back(), 0);
   assert_eq!(*buf.back_mut(), 0);
-  assert_eq!(buf.back_idx(), 2);
 
   buf.push_front(3);
   assert_eq!(*buf.front(), 3);
   assert_eq!(*buf.front_mut(), 3);
-  assert_eq!(buf.front_idx(), 2);
   assert_eq!(*buf.back(), 2);
   assert_eq!(*buf.back_mut(), 2);
-  assert_eq!(buf.back_idx(), 0);
 
   buf.push_front(10);
   assert_eq!(*buf.front(), 10);
   assert_eq!(*buf.front_mut(), 10);
-  assert_eq!(buf.front_idx(), 0);
   assert_eq!(*buf.back(), 5);
   assert_eq!(*buf.back_mut(), 5);
-  assert_eq!(buf.back_idx(), 1);
 
   let x = buf.pop_front();
   assert_eq!(x, 10);
   assert_eq!(*buf.front(), 3);
   assert_eq!(*buf.front_mut(), 3);
-  assert_eq!(buf.front_idx(), 2);
   assert_eq!(*buf.back(), 0);
   assert_eq!(*buf.back_mut(), 0);
-  assert_eq!(buf.back_idx(), 0);
 
   let x = buf.pop_front();
   assert_eq!(x, 3);
   assert_eq!(*buf.front(), 5);
   assert_eq!(*buf.front_mut(), 5);
-  assert_eq!(buf.front_idx(), 1);
   assert_eq!(*buf.back(), 0);
   assert_eq!(*buf.back_mut(), 0);
-  assert_eq!(buf.back_idx(), 2);
 }
 
 /// Check that we can modify the front and the back of a ring buffer.

@@ -3,8 +3,6 @@
 
 use std::mem::size_of;
 use std::mem::take;
-use std::ops::Deref;
-use std::ops::DerefMut;
 use std::ops::Index;
 use std::ops::IndexMut;
 
@@ -136,11 +134,11 @@ impl<T> RingBuf<T> {
   /// that got inserted most recently.
   ///
   /// Note that this index only has real relevance when accessing the
-  /// underlying slice using `deref`. In particular, the index returned
-  /// by this method should not be confused with those as expected by
-  /// our `Index` implementation (as accessible through bracket syntax).
+  /// underlying slice. In particular, the index returned by this method
+  /// should not be confused with those as expected by our `Index`
+  /// implementation (as accessible through bracket syntax).
   #[inline]
-  pub fn front_idx(&self) -> usize {
+  fn front_idx(&self) -> usize {
     if self.next == 0 {
       self.len() - 1
     } else {
@@ -180,11 +178,11 @@ impl<T> RingBuf<T> {
   /// that got inserted the furthest in the past.
   ///
   /// Note that this index only has real relevance when accessing the
-  /// underlying slice using `deref`. In particular, the index returned
-  /// by this method should not be confused with those as expected by
-  /// our `Index` implementation (as accessible through bracket syntax).
+  /// underlying slice. In particular, the index returned by this method
+  /// should not be confused with those as expected by our `Index`
+  /// implementation (as accessible through bracket syntax).
   #[inline]
-  pub fn back_idx(&self) -> usize {
+  fn back_idx(&self) -> usize {
     self.next
   }
 
@@ -230,22 +228,6 @@ impl<T> RingBuf<T> {
     );
 
     RingIterMut::new(&mut self.data, self.next)
-  }
-}
-
-impl<T> Deref for RingBuf<T> {
-  type Target = [T];
-
-  #[inline]
-  fn deref(&self) -> &Self::Target {
-    self.data.deref()
-  }
-}
-
-impl<T> DerefMut for RingBuf<T> {
-  #[inline]
-  fn deref_mut(&mut self) -> &mut Self::Target {
-    self.data.deref_mut()
   }
 }
 
