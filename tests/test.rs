@@ -60,6 +60,7 @@ fn iter_size_hint() {
 
 #[test]
 fn iter_next() {
+  #[track_caller]
   fn assert_equal_impl<I1, I2>(mut it_buf: I1, mut it_exp: I2)
   where
     I1: ExactSizeIterator<Item = usize>,
@@ -79,6 +80,7 @@ fn iter_next() {
     }
   }
 
+  #[track_caller]
   fn assert_equal(buf: &RingBuf<usize>, expected: Vec<usize>) {
     assert_equal_impl(buf.iter().cloned(), expected.iter().cloned());
     assert_equal_impl(buf.iter().cloned().rev(), expected.iter().cloned().rev());
