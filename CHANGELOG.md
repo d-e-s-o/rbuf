@@ -2,6 +2,7 @@ Unreleased
 ----------
 - Removed `Deref` and `DerefMut` impls from `RingBuf`
 - Removed `RingBuf::front_idx` and `RingBuf::back_idx` methods
+- Bumped minimum supported Rust version to `1.58`
 
 
 0.1.5

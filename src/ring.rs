@@ -188,7 +188,7 @@ impl<T> RingBuf<T> {
   pub fn push_front(&mut self, elem: T) {
     let next = self.next;
     let len = self.data.len();
-    debug_assert!(next < len, "next: {}, len: {}", next, len);
+    debug_assert!(next < len, "next: {next}, len: {len}");
     #[cfg(debug_assertions)]
     {
       *self.data.get_mut(next).unwrap() = elem;
