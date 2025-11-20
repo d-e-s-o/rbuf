@@ -14,10 +14,11 @@ pub use ring::RingBuf;
 
 /// Create a [`RingBuf`] containing the provided elements.
 ///
-/// Similar to creation from a `Vec`, the last element in the provided
-/// list is considered the most recent one and forms the "front". The
-/// first element represents the "back".
+/// This macro provides a concise way for creating a `RingBuf` object
+/// from a `Vec`, wrapping the [`RingBuf::from_vec`] constructor. Please
+/// refer to it for precise semantics.
 ///
+/// # Examples
 /// ```rust
 /// # use rbuf::ring_buf;
 /// let mut buf = ring_buf![1, 2, 3, 4];

@@ -22,11 +22,10 @@ use crate::RingIterMut;
 /// many elements as the ring buffer's size.
 ///
 /// Indexing into the ring buffer using bracket notation works in such a
-/// way that an index of `0` always accesses the least recently added
-/// element and an index of `self.len() - 1` the most recently added
-/// one. Furthermore, indexes wrap around at the ring buffer's end,
-/// meaning that an index of value `self.len()` would access the same
-/// element as index `0`.
+/// way that an index of `0` always accesses the front element and an
+/// index of `self.len() - 1` the back one. Furthermore, indexes wrap
+/// around at the ring buffer's end, meaning that an index of value
+/// `self.len()` would access the front element as well.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RingBuf<T> {
   /// Our actual data.
@@ -35,7 +34,7 @@ pub struct RingBuf<T> {
   /// element from, whichever comes first.
   ///
   /// The element at the index just before this one (wrapping around at
-  /// zero), marks the element most recently inserted into the buffer.
+  /// zero), marks the front element.
   next: usize,
 }
 
@@ -53,12 +52,11 @@ where
     Self::from_vec(vec)
   }
 
-  /// Pop the most recently added element from the ring buffer.
+  /// Pop the front element from the ring buffer.
   ///
-  /// This operation will remove the ring buffer's most recently added
-  /// element and replace it with the default value of `T`. The formerly
-  /// second most recently added element will be the ring buffer's new
-  /// "front".
+  /// This operation will remove the ring buffer's front element and
+  /// replace it with the default value of `T`. The element after the
+  /// current front will become the new front.
   pub fn pop_front(&mut self) -> T {
     let idx = self.front_idx();
     self.next = idx;
@@ -82,9 +80,8 @@ where
 impl<T> RingBuf<T> {
   /// Create a new `RingBuf` with data from a `Vec`.
   ///
-  /// Note that the vector's first element is considered the oldest one,
-  /// which means that the first read will access it and pushed data
-  /// will overwrite it first.
+  /// Note that the vector's first element is considered the "front".
+  ///
   /// Note furthermore that the provided `Vec` is required to contain at
   /// least a single element.
   pub fn from_vec(vec: Vec<T>) -> Self {
@@ -102,8 +99,7 @@ impl<T> RingBuf<T> {
     self.data.len()
   }
 
-  /// Retrieve the current "front" element, i.e., the element that got
-  /// inserted most recently.
+  /// Retrieve the current "front" element.
   #[inline]
   pub fn front(&self) -> &T {
     let idx = self.front_idx();
@@ -116,8 +112,7 @@ impl<T> RingBuf<T> {
     front
   }
 
-  /// Retrieve the current "front" element, i.e., the element that got
-  /// inserted most recently.
+  /// Retrieve the current "front" element.
   #[inline]
   pub fn front_mut(&mut self) -> &mut T {
     let idx = self.front_idx();
@@ -130,8 +125,7 @@ impl<T> RingBuf<T> {
     front
   }
 
-  /// Retrieve the current "front" index, i.e., the index of the element
-  /// that got inserted most recently.
+  /// Retrieve the current "front" index.
   ///
   /// Note that this index only has real relevance when accessing the
   /// underlying slice. In particular, the index returned by this method
@@ -146,8 +140,7 @@ impl<T> RingBuf<T> {
     }
   }
 
-  /// Retrieve the current "back" element, i.e., the element that got
-  /// inserted the furthest in the past.
+  /// Retrieve the current back element.
   #[inline]
   pub fn back(&self) -> &T {
     let idx = self.back_idx();
@@ -160,8 +153,7 @@ impl<T> RingBuf<T> {
     back
   }
 
-  /// Retrieve the current "back" element, i.e., the element that got
-  /// inserted the furthest in the past.
+  /// Retrieve the current back element.
   #[inline]
   pub fn back_mut(&mut self) -> &mut T {
     let idx = self.back_idx();
@@ -174,8 +166,7 @@ impl<T> RingBuf<T> {
     back
   }
 
-  /// Retrieve the current "back" index, i.e., the index of the element
-  /// that got inserted the furthest in the past.
+  /// Retrieve the current back index.
   ///
   /// Note that this index only has real relevance when accessing the
   /// underlying slice. In particular, the index returned by this method
@@ -186,12 +177,13 @@ impl<T> RingBuf<T> {
     self.next
   }
 
-  /// Push an element into the ring buffer.
+  /// Push an element to the front of the ring buffer.
   ///
-  /// This operation will evict the ring buffer's least recently added
-  /// element (i.e., the element at the back) and replace it with the
-  /// provided one. The newly pushed element will be considered the ring
-  /// buffer's new "front".
+  /// This operation will push a new element before the current front
+  /// into the ring buffer and make it the new front.
+  ///
+  /// Given the fixed-size and cyclic nature of the ring buffer, a push
+  /// to the front entails a replacement of the back element.
   #[inline]
   pub fn push_front(&mut self, elem: T) {
     let next = self.next;
