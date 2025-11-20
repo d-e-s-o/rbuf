@@ -22,8 +22,8 @@ pub use ring::RingBuf;
 /// ```rust
 /// # use rbuf::ring_buf;
 /// let mut buf = ring_buf![1, 2, 3, 4];
-/// assert_eq!(*buf.front(), 4);
-/// assert_eq!(*buf.back(), 1);
+/// assert_eq!(*buf.front(), 1);
+/// assert_eq!(*buf.back(), 4);
 /// ```
 #[macro_export]
 macro_rules! ring_buf [

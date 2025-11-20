@@ -89,20 +89,21 @@ fn iter_next() {
   let mut buf = RingBuf::<usize>::new(4);
 
   buf.push_front(42);
-  assert_equal(&buf, vec![0, 0, 0, 42]);
+  assert_equal(&buf, vec![42, 0, 0, 0]);
 
   buf.push_front(13);
-  assert_equal(&buf, vec![0, 0, 42, 13]);
+  assert_equal(&buf, vec![13, 42, 0, 0]);
 
-  buf.push_front(0);
-  assert_equal(&buf, vec![0, 42, 13, 0]);
+  buf.push_front(1);
+  assert_equal(&buf, vec![1, 13, 42, 0]);
 
   buf.push_front(7);
-  assert_equal(&buf, vec![42, 13, 0, 7]);
+  assert_equal(&buf, vec![7, 1, 13, 42]);
 
   buf.push_front(2);
-  assert_equal(&buf, vec![13, 0, 7, 2]);
+  assert_equal(&buf, vec![2, 7, 1, 13]);
 }
+
 
 /// Check that users cannot create a mutable iterator over a ring buffer
 /// containing objects of a zero sized type.
@@ -196,11 +197,11 @@ fn front_back_mut() {
 
   *buf.front_mut() = 42;
   assert_eq!(*buf.front(), 42);
-  assert_eq!(buf, ring_buf![71, 32, 0, 4, 42]);
+  assert_eq!(buf, ring_buf![42, 32, 0, 4, 99]);
 
   *buf.back_mut() = 68;
   assert_eq!(*buf.back(), 68);
-  assert_eq!(buf, ring_buf![68, 32, 0, 4, 42]);
+  assert_eq!(buf, ring_buf![42, 32, 0, 4, 68]);
 }
 
 #[test]
@@ -213,11 +214,11 @@ fn buf_index() {
   assert_eq!(buf[4], 3);
 
   buf.push_front(8);
-  assert_eq!(buf[0], 4);
-  assert_eq!(buf[1], 5);
-  assert_eq!(buf[2], 6);
-  assert_eq!(buf[3], 8);
-  assert_eq!(buf[4], 4);
+  assert_eq!(buf[0], 8);
+  assert_eq!(buf[1], 3);
+  assert_eq!(buf[2], 4);
+  assert_eq!(buf[3], 5);
+  assert_eq!(buf[4], 8);
 }
 
 #[test]

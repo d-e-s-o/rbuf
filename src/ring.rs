@@ -14,9 +14,9 @@ use crate::RingIterMut;
 ///
 /// The ring buffer is always "full", but may only contain "default"
 /// representations of the given type if nothing else has been inserted.
-/// There is no concept of a removing elements, only overwriting them
-/// with the default. Gaps or non-existent elements can be represented
-/// by having an element type `Option<T>`.
+/// There is no concept of removing elements, only overwriting them with
+/// the default. Gaps or non-existent elements can be represented by
+/// having an element type `Option<T>`.
 ///
 /// One implication of the above is that iteration will always yield as
 /// many elements as the ring buffer's size.
@@ -30,12 +30,8 @@ use crate::RingIterMut;
 pub struct RingBuf<T> {
   /// Our actual data.
   data: Box<[T]>,
-  /// The index where to write the next element to or read the first
-  /// element from, whichever comes first.
-  ///
-  /// The element at the index just before this one (wrapping around at
-  /// zero), marks the front element.
-  next: usize,
+  /// The index of the front element.
+  front: usize,
 }
 
 impl<T> RingBuf<T>
@@ -59,7 +55,7 @@ where
   /// current front will become the new front.
   pub fn pop_front(&mut self) -> T {
     let idx = self.front_idx();
-    self.next = idx;
+    self.front = (idx + 1) % self.len();
 
     #[cfg(debug_assertions)]
     let front = take(self.data.get_mut(idx).unwrap());
@@ -89,7 +85,7 @@ impl<T> RingBuf<T> {
 
     Self {
       data: vec.into_boxed_slice(),
-      next: 0,
+      front: 0,
     }
   }
 
@@ -133,11 +129,7 @@ impl<T> RingBuf<T> {
   /// implementation (as accessible through bracket syntax).
   #[inline]
   fn front_idx(&self) -> usize {
-    if self.next == 0 {
-      self.len() - 1
-    } else {
-      self.next - 1
-    }
+    self.front
   }
 
   /// Retrieve the current back element.
@@ -174,7 +166,11 @@ impl<T> RingBuf<T> {
   /// implementation (as accessible through bracket syntax).
   #[inline]
   fn back_idx(&self) -> usize {
-    self.next
+    if self.front == 0 {
+      self.len() - 1
+    } else {
+      self.front - 1
+    }
   }
 
   /// Push an element to the front of the ring buffer.
@@ -186,19 +182,20 @@ impl<T> RingBuf<T> {
   /// to the front entails a replacement of the back element.
   #[inline]
   pub fn push_front(&mut self, elem: T) {
-    let next = self.next;
     let len = self.data.len();
-    debug_assert!(next < len, "next: {next}, len: {len}");
+    let idx = self.front.checked_sub(1).unwrap_or(len - 1);
+    debug_assert!(idx < len, "idx: {idx}, len: {len}");
+
     #[cfg(debug_assertions)]
     {
-      *self.data.get_mut(next).unwrap() = elem;
+      *self.data.get_mut(idx).unwrap() = elem;
     }
     #[cfg(not(debug_assertions))]
     // SAFETY: The index is within the bounds of the underlying slice.
     unsafe {
-      *self.data.get_unchecked_mut(next) = elem;
+      *self.data.get_unchecked_mut(idx) = elem;
     }
-    self.next = (next + 1) % len;
+    self.front = idx;
   }
 
   /// Retrieve an iterator over the elements of the ring buffer.
@@ -232,7 +229,7 @@ impl<T> Index<usize> for RingBuf<T> {
 
   #[inline]
   fn index(&self, idx: usize) -> &Self::Output {
-    let idx = (self.back_idx() + idx) % self.len();
+    let idx = (self.front_idx() + idx) % self.len();
     #[cfg(debug_assertions)]
     let elem = self.data.get(idx).unwrap();
     #[cfg(not(debug_assertions))]
@@ -246,7 +243,7 @@ impl<T> Index<usize> for RingBuf<T> {
 impl<T> IndexMut<usize> for RingBuf<T> {
   #[inline]
   fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
-    let idx = (self.back_idx() + idx) % self.len();
+    let idx = (self.front_idx() + idx) % self.len();
     #[cfg(debug_assertions)]
     let elem = self.data.get_mut(idx).unwrap();
     #[cfg(not(debug_assertions))]
