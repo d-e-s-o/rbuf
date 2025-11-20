@@ -3,60 +3,69 @@
 
 use std::iter::DoubleEndedIterator;
 use std::iter::FusedIterator;
+use std::marker::PhantomData;
+use std::ops::Index;
+use std::ops::IndexMut;
 
 
 macro_rules! iterator {
   (
     $(#[$meta:meta])* struct $name:ident,
     {$( $const_:tt )?},
-    {$( $mut_:tt )?},
-    $as_ptr:tt,
+    {$( $ref_mut:tt )?},
+    {$ptr_mut:tt},
+    {$idx:path},
   ) => {
     $(#[$meta])*
     pub struct $name<'b, T> {
-      /// The actual ring buffer data we work with.
-      buf: &'b $( $mut_ )? [T],
+      /// A pointer to the ring buffer we work with.
+      ///
+      /// We use a pointer here, because at least for mutable iterators,
+      /// the borrow checker is unable to prove correct adherence to
+      /// aliasing rules, because we yield elements with 'b lifetime
+      /// that outlives 'self. We make sure to guarantee those at
+      /// runtime.
+      buf: *$ptr_mut $crate::RingBuf<T>,
       /// The index of the next element to yield in forward direction.
       next: usize,
       /// The index of the next element to yield in backward direction.
       next_back: usize,
+      /// Phantom data for our lifetime.
+      _phantom: PhantomData<&'b $( $ref_mut )? T>,
     }
 
     impl<'b, T> $name<'b, T> {
       /// Create a new iterator over the given ring buffer data.
-      pub(crate) $( $const_ )? fn new(buf: &'b $( $mut_ )? [T], next: usize) -> Self {
+      #[inline]
+      pub(crate) $( $const_ )? fn new(buf: &'b $( $ref_mut )? $crate::RingBuf<T>) -> Self {
         let len = buf.len();
         Self {
-          buf,
-          next,
-          // By adding our buffer's length here we ensure that the
-          // iterator's `next` is always less or equal to `next_back`.
-          next_back: next + len,
+          buf: buf as _,
+          // Indexing into a `RingBuf` at zero always yields the front
+          // and that's where we start.
+          next: 0,
+          next_back: len,
+          _phantom: PhantomData,
         }
       }
     }
 
     impl<'b, T> Iterator for $name<'b, T> {
-      type Item = &'b $( $mut_ )? T;
+      type Item = &'b $( $ref_mut )? T;
 
       #[inline]
       fn next(&mut self) -> Option<Self::Item> {
         if self.next < self.next_back {
-          let idx = self.next % self.buf.len();
-          debug_assert!(idx < self.buf.len());
-          // SAFETY: The index is within the bounds of the underlying slice.
-          //         For mutable iterators, specifically, it is also
-          //         impossible for the iterator to yield the same
-          //         element multiple times (which would violate
-          //         exclusive mutable reference rules). Furthermore,
-          //         mutable iterators do not support zero sized types
-          //         (prevented at run time), which would violate Rust's
-          //         exclusive mutable reference rule as well with our
-          //         current implementation.
-          let elem = unsafe { & $( $mut_ )? * self.buf.$as_ptr().add(idx) };
-
+          let idx = self.next;
           self.next += 1;
-          Some(elem)
+
+          // SAFETY: Our `buf` pointer is always valid. For mutable
+          //         iterators, we guarantee that we never yield a
+          //         mutable reference to the same element with a
+          //         lifetime outliving `self` twice, by stopping
+          //         iteration before that.
+          let rbuf = unsafe { &$( $ref_mut )?*self.buf };
+          Some($idx(rbuf, idx))
         } else {
           None
         }
@@ -65,9 +74,8 @@ macro_rules! iterator {
       /// Return the bounds on the remaining length of the iterator.
       #[inline]
       fn size_hint(&self) -> (usize, Option<usize>) {
-        // `next_back` should always be greater or equal to `next`
-        // because it is initialized to `next` plus the slice's length
-        // upon construction.
+        // `next_back` should always be greater or equal to `next` as
+        // per our invariant.
         debug_assert!(self.next_back >= self.next);
 
         let len = self.next_back - self.next;
@@ -82,20 +90,13 @@ macro_rules! iterator {
           debug_assert!(self.next_back > 0);
           self.next_back -= 1;
 
-          let idx = self.next_back % self.buf.len();
-          debug_assert!(idx < self.buf.len());
-          // SAFETY: The index is within the bounds of the underlying slice.
-          //         For mutable iterators, specifically, it is also
-          //         impossible for the iterator to yield the same
-          //         element multiple times (which would violate
-          //         exclusive mutable reference rules). Furthermore,
-          //         mutable iterators do not support zero sized types
-          //         (prevented at run time), which would violate Rust's
-          //         exclusive mutable reference rule as well with our
-          //         current implementation.
-          let elem = unsafe { & $( $mut_ )? * self.buf.$as_ptr().add(idx) };
-
-          Some(elem)
+          // SAFETY: Our `buf` pointer is always valid. For mutable
+          //         iterators, we guarantee that we never yield a
+          //         mutable reference to the same element with a
+          //         lifetime outliving `self` twice, by stopping
+          //         iteration before that.
+          let rbuf = unsafe { &$( $ref_mut )?*self.buf };
+          Some($idx(rbuf, self.next_back))
         } else {
           None
         }
@@ -111,10 +112,10 @@ macro_rules! iterator {
 iterator! {
   /// An iterator over the elements of a `RingBuf`.
   #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-  struct RingIter, {const}, {}, as_ptr,
+  struct RingIter, {const}, {}, {const}, {Index::index},
 }
 iterator! {
   /// A mutable iterator over the elements of a `RingBuf`.
   #[derive(Debug, Eq, PartialEq)]
-  struct RingIterMut, {}, {mut}, as_mut_ptr,
+  struct RingIterMut, {}, {mut}, {mut}, {IndexMut::index_mut},
 }

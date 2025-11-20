@@ -210,12 +210,16 @@ impl<T> RingBuf<T> {
   }
 
   /// Retrieve an iterator over the elements of the ring buffer.
+  ///
+  /// The iterator traverses the ring buffer in front-to-back manner.
   #[inline]
   pub const fn iter(&self) -> RingIter<'_, T> {
-    RingIter::new(&self.data, self.next)
+    RingIter::new(self)
   }
 
   /// Retrieve a mutating iterator over the elements of the ring buffer.
+  ///
+  /// The iterator traverses the ring buffer in front-to-back manner.
   ///
   /// # Panics
   /// This method panics when `T` is a zero sized type.
@@ -227,7 +231,7 @@ impl<T> RingBuf<T> {
       "Mutable iterators are not supported on ring buffers over zero sized types"
     );
 
-    RingIterMut::new(&mut self.data, self.next)
+    RingIterMut::new(self)
   }
 }
 
