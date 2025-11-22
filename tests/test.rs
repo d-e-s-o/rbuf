@@ -3,6 +3,7 @@
 
 //! Integration tests for the `rbuf` crate.
 
+use std::collections::VecDeque;
 use std::ops::Deref as _;
 
 use rbuf::ring_buf;
@@ -58,6 +59,8 @@ fn iter_size_hint() {
   test(&buf);
 }
 
+
+/// Make sure that `RingBuf` iteration works as it should.
 #[test]
 fn iter_next() {
   #[track_caller]
@@ -81,27 +84,40 @@ fn iter_next() {
   }
 
   #[track_caller]
-  fn assert_equal(buf: &RingBuf<usize>, expected: Vec<usize>) {
+  fn assert_equal(buf: &RingBuf<usize>, expected: &VecDeque<usize>) {
     assert_equal_impl(buf.iter().cloned(), expected.iter().cloned());
     assert_equal_impl(buf.iter().cloned().rev(), expected.iter().cloned().rev());
   }
 
   let mut buf = RingBuf::<usize>::new(4);
+  let mut deq = VecDeque::from(vec![0, 0, 0, 0]);
 
   buf.push_front(42);
-  assert_equal(&buf, vec![42, 0, 0, 0]);
+  deq.push_front(42);
+  // A `VecDeque` is not fixed-size so to achieve same semantics as our
+  // `RingBuf` we have to pop the back element.
+  deq.pop_back();
+  assert_equal(&buf, &deq);
 
   buf.push_front(13);
-  assert_equal(&buf, vec![13, 42, 0, 0]);
+  deq.push_front(13);
+  deq.pop_back();
+  assert_equal(&buf, &deq);
 
   buf.push_front(1);
-  assert_equal(&buf, vec![1, 13, 42, 0]);
+  deq.push_front(1);
+  deq.pop_back();
+  assert_equal(&buf, &deq);
 
   buf.push_front(7);
-  assert_equal(&buf, vec![7, 1, 13, 42]);
+  deq.push_front(7);
+  deq.pop_back();
+  assert_equal(&buf, &deq);
 
   buf.push_front(2);
-  assert_equal(&buf, vec![2, 7, 1, 13]);
+  deq.push_front(2);
+  deq.pop_back();
+  assert_equal(&buf, &deq);
 }
 
 
@@ -204,21 +220,36 @@ fn front_back_mut() {
   assert_eq!(buf, ring_buf![42, 32, 0, 4, 68]);
 }
 
+
+/// Check that we can index into a `RingBuf` as expected and make sure
+/// that semantics are comparable to those of `VecDeque`.
 #[test]
 fn buf_index() {
   let mut buf = RingBuf::from_vec(vec![3, 4, 5, 6]);
+  let mut deq = VecDeque::from(vec![3, 4, 5, 6]);
+
   assert_eq!(buf[0], 3);
   assert_eq!(buf[1], 4);
   assert_eq!(buf[2], 5);
   assert_eq!(buf[3], 6);
   assert_eq!(buf[4], 3);
+  assert_eq!(buf[0], deq[0]);
+  assert_eq!(buf[1], deq[1]);
+  assert_eq!(buf[2], deq[2]);
+  assert_eq!(buf[3], deq[3]);
 
   buf.push_front(8);
+  deq.push_front(8);
+  deq.pop_back();
   assert_eq!(buf[0], 8);
   assert_eq!(buf[1], 3);
   assert_eq!(buf[2], 4);
   assert_eq!(buf[3], 5);
   assert_eq!(buf[4], 8);
+  assert_eq!(buf[0], deq[0]);
+  assert_eq!(buf[1], deq[1]);
+  assert_eq!(buf[2], deq[2]);
+  assert_eq!(buf[3], deq[3]);
 }
 
 #[test]
