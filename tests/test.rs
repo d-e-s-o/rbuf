@@ -16,6 +16,23 @@ fn buf_len() {
   assert_eq!(buf.len(), 13);
 }
 
+/// Make sure that we can correctly rearrange the `RingBuf`'s data into
+/// a contiguous slice.
+#[test]
+fn rearrangement() {
+  let mut buf = ring_buf![1, 2, 3, 4];
+  assert_eq!(buf.make_contiguous(), &[1, 2, 3, 4]);
+  assert_eq!(*buf.front(), 1);
+
+  let () = buf.push_front(5);
+  assert_eq!(buf.make_contiguous(), &[5, 1, 2, 3]);
+  assert_eq!(*buf.front(), 5);
+
+  let () = buf.push_back(6);
+  assert_eq!(buf.make_contiguous(), &[1, 2, 3, 6]);
+  assert_eq!(*buf.front(), 1);
+}
+
 /// Check that the provided size hint is correct.
 #[test]
 fn iter_size_hint() {

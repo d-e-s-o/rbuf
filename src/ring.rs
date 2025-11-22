@@ -107,6 +107,16 @@ impl<T> RingBuf<T> {
     }
   }
 
+  /// Rearrange the internal storage of the ring buffer so it is one
+  /// contiguous slice, with the front being the first element and the
+  /// back the last one.
+  #[inline]
+  pub fn make_contiguous(&mut self) -> &mut [T] {
+    let () = self.data.rotate_left(self.front);
+    self.front = 0;
+    &mut self.data
+  }
+
   /// Retrieve the ring buffer's length.
   #[inline]
   pub const fn len(&self) -> usize {
