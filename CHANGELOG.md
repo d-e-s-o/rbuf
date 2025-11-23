@@ -4,6 +4,8 @@ Unreleased
   `VecDeque`
 - Added `RingBuf::push_back` and `RingBuf::pop_back` methods
 - Added `RingBuf::make_contiguous` method
+- Adjusted `RingBuf::into_boxed_slice` to rearrange elements into
+  contiguous slice first
 - Removed `Deref` and `DerefMut` impls from `RingBuf`
 - Removed `RingBuf::front_idx` and `RingBuf::back_idx` methods
 - Bumped minimum supported Rust version to `1.58`

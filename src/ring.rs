@@ -85,7 +85,11 @@ where
   }
 
   /// Convert the `RingBuf` into a boxed slice of its contents.
-  pub fn into_boxed_slice(self) -> Box<[T]> {
+  ///
+  /// The slice's first element will represents the (former) ring
+  /// buffer's front its last element the buffer's back.
+  pub fn into_boxed_slice(mut self) -> Box<[T]> {
+    let _data = self.make_contiguous();
     self.data
   }
 }
