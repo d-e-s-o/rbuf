@@ -1,5 +1,5 @@
-Unreleased
-----------
+0.2.0
+-----
 - Changed "front" and "back" semantics to more closely resemble those of
   `VecDeque`
 - Added `RingBuf::push_back` and `RingBuf::pop_back` methods
