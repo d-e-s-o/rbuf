@@ -2,6 +2,7 @@ Unreleased
 ----------
 - Changed "front" and "back" semantics to more closely resemble those of
   `VecDeque`
+- Added `RingBuf::push_back` and `RingBuf::pop_back` methods
 - Removed `Deref` and `DerefMut` impls from `RingBuf`
 - Removed `RingBuf::front_idx` and `RingBuf::back_idx` methods
 - Bumped minimum supported Rust version to `1.58`

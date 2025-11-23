@@ -66,6 +66,24 @@ where
     front
   }
 
+  /// Pop the back element from the ring buffer.
+  ///
+  /// This operation will remove the ring buffer's back element and
+  /// replace it with the default value of `T`. The element before the
+  /// current back will become the new back.
+  pub fn pop_back(&mut self) -> T {
+    let idx = self.back_idx();
+    self.front = idx;
+
+    #[cfg(debug_assertions)]
+    let back = take(self.data.get_mut(idx).unwrap());
+    #[cfg(not(debug_assertions))]
+    // SAFETY: The index is within the bounds of the underlying slice.
+    let back = take(unsafe { self.data.get_unchecked_mut(idx) });
+
+    back
+  }
+
   /// Convert the `RingBuf` into a boxed slice of its contents.
   pub fn into_boxed_slice(self) -> Box<[T]> {
     self.data
@@ -166,11 +184,7 @@ impl<T> RingBuf<T> {
   /// implementation (as accessible through bracket syntax).
   #[inline]
   fn back_idx(&self) -> usize {
-    if self.front == 0 {
-      self.len() - 1
-    } else {
-      self.front - 1
-    }
+    self.front.checked_sub(1).unwrap_or(self.len() - 1)
   }
 
   /// Push an element to the front of the ring buffer.
@@ -183,7 +197,7 @@ impl<T> RingBuf<T> {
   #[inline]
   pub fn push_front(&mut self, elem: T) {
     let len = self.data.len();
-    let idx = self.front.checked_sub(1).unwrap_or(len - 1);
+    let idx = self.back_idx();
     debug_assert!(idx < len, "idx: {idx}, len: {len}");
 
     #[cfg(debug_assertions)]
@@ -196,6 +210,31 @@ impl<T> RingBuf<T> {
       *self.data.get_unchecked_mut(idx) = elem;
     }
     self.front = idx;
+  }
+
+  /// Push an element to the back of the ring buffer.
+  ///
+  /// This operation will push a new element after the current back into
+  /// the ring buffer and make it the new back.
+  ///
+  /// Given the fixed-size and cyclic nature of the ring buffer, a push
+  /// to the back entails a replacement of the front element.
+  #[inline]
+  pub fn push_back(&mut self, elem: T) {
+    let len = self.data.len();
+    let idx = self.front_idx();
+    debug_assert!(idx < len, "idx: {idx}, len: {len}");
+
+    #[cfg(debug_assertions)]
+    {
+      *self.data.get_mut(idx).unwrap() = elem;
+    }
+    #[cfg(not(debug_assertions))]
+    // SAFETY: The index is within the bounds of the underlying slice.
+    unsafe {
+      *self.data.get_unchecked_mut(idx) = elem;
+    }
+    self.front = (self.front + 1) % self.len();
   }
 
   /// Retrieve an iterator over the elements of the ring buffer.

@@ -57,6 +57,9 @@ fn iter_size_hint() {
 
   buf.push_front(31);
   test(&buf);
+
+  buf.push_back(2);
+  test(&buf);
 }
 
 
@@ -157,9 +160,10 @@ fn double_ended_iter() {
   assert_eq!(it.next(), None);
 }
 
+/// Check that push/pop operations on the front of a `RingBuf` work as
+/// they should.
 #[test]
-#[allow(clippy::cognitive_complexity)]
-fn front_back() {
+fn front_ops() {
   let mut buf = RingBuf::<usize>::new(3);
 
   assert_eq!(*buf.front(), 0);
@@ -204,6 +208,59 @@ fn front_back() {
   assert_eq!(*buf.front_mut(), 5);
   assert_eq!(*buf.back(), 0);
   assert_eq!(*buf.back_mut(), 0);
+}
+
+/// Make sure that push/pop operations on the back of a `RingBuf` work
+/// as expected.
+#[test]
+fn back_ops() {
+  let mut buf = RingBuf::<usize>::new(3);
+  //[4, 2, 3]
+
+  let () = buf.push_back(1);
+  assert_eq!(*buf.back(), 1);
+  assert_eq!(*buf.back_mut(), 1);
+  assert_eq!(*buf.front(), 0);
+  assert_eq!(*buf.front_mut(), 0);
+
+  let () = buf.push_back(2);
+  assert_eq!(*buf.back(), 2);
+  assert_eq!(*buf.back_mut(), 2);
+  assert_eq!(*buf.front(), 0);
+  assert_eq!(*buf.front_mut(), 0);
+
+  let () = buf.push_back(3);
+  assert_eq!(*buf.back(), 3);
+  assert_eq!(*buf.back_mut(), 3);
+  assert_eq!(*buf.front(), 1);
+  assert_eq!(*buf.front_mut(), 1);
+
+  let () = buf.push_back(4);
+  assert_eq!(*buf.back(), 4);
+  assert_eq!(*buf.back_mut(), 4);
+  assert_eq!(*buf.front(), 2);
+  assert_eq!(*buf.front_mut(), 2);
+
+  let x = buf.pop_back();
+  assert_eq!(x, 4);
+  assert_eq!(*buf.back(), 3);
+  assert_eq!(*buf.back_mut(), 3);
+  assert_eq!(*buf.front(), 0);
+  assert_eq!(*buf.front_mut(), 0);
+
+  let x = buf.pop_back();
+  assert_eq!(x, 3);
+  assert_eq!(*buf.back(), 2);
+  assert_eq!(*buf.back_mut(), 2);
+  assert_eq!(*buf.front(), 0);
+  assert_eq!(*buf.front_mut(), 0);
+
+  let x = buf.pop_back();
+  assert_eq!(x, 2);
+  assert_eq!(*buf.back(), 0);
+  assert_eq!(*buf.back_mut(), 0);
+  assert_eq!(*buf.front(), 0);
+  assert_eq!(*buf.front_mut(), 0);
 }
 
 /// Check that we can modify the front and the back of a ring buffer.
