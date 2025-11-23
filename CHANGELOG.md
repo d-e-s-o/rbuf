@@ -4,6 +4,7 @@ Unreleased
   `VecDeque`
 - Added `RingBuf::push_back` and `RingBuf::pop_back` methods
 - Added `RingBuf::make_contiguous` method
+- Added `From<Box<[T]>>` impl for `RingBuf`
 - Adjusted `RingBuf::into_boxed_slice` to rearrange elements into
   contiguous slice first
 - Removed `Deref` and `DerefMut` impls from `RingBuf`

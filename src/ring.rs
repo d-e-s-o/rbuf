@@ -102,13 +102,9 @@ impl<T> RingBuf<T> {
   ///
   /// Note furthermore that the provided `Vec` is required to contain at
   /// least a single element.
+  #[inline]
   pub fn from_vec(vec: Vec<T>) -> Self {
-    assert!(!vec.is_empty());
-
-    Self {
-      data: vec.into_boxed_slice(),
-      front: 0,
-    }
+    Self::from(vec.into_boxed_slice())
   }
 
   /// Rearrange the internal storage of the ring buffer so it is one
@@ -304,5 +300,21 @@ impl<T> IndexMut<usize> for RingBuf<T> {
     let elem = unsafe { self.data.get_unchecked_mut(idx) };
 
     elem
+  }
+}
+
+/// Create a `RingBuf` from a boxed slice.
+///
+/// # Panics
+/// This conversion panics if the provided slice is empty.
+impl<T> From<Box<[T]>> for RingBuf<T> {
+  #[inline]
+  fn from(other: Box<[T]>) -> Self {
+    assert!(!other.is_empty());
+
+    Self {
+      data: other,
+      front: 0,
+    }
   }
 }

@@ -338,9 +338,13 @@ fn boxed_slice() {
   let buf = ring_buf![3, 4, 5, 6];
   let slice = buf.into_boxed_slice();
   assert_eq!(slice.deref(), vec![3, 4, 5, 6].as_slice());
+  let buf = RingBuf::from(slice);
+  assert_eq!(buf, ring_buf![3, 4, 5, 6]);
 
   let mut buf = ring_buf![3, 4, 5, 6];
   let () = buf.push_front(2);
   let slice = buf.into_boxed_slice();
   assert_eq!(slice.deref(), vec![2, 3, 4, 5].as_slice());
+  let buf = RingBuf::from(slice);
+  assert_eq!(buf, ring_buf![2, 3, 4, 5]);
 }
