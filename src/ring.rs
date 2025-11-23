@@ -40,7 +40,8 @@ where
 {
   /// Create a new `RingBuf` of a fixed length as provided.
   ///
-  /// `len` must be greater than zero.
+  /// # Panics
+  /// This constructor panics if `len` is zero.
   pub fn new(len: usize) -> Self {
     let mut vec = Vec::with_capacity(len);
     vec.resize_with(len, Default::default);
@@ -98,10 +99,10 @@ where
 impl<T> RingBuf<T> {
   /// Create a new `RingBuf` with data from a `Vec`.
   ///
-  /// Note that the vector's first element is considered the "front".
+  /// Note that the vector's first element is considered the front.
   ///
-  /// Note furthermore that the provided `Vec` is required to contain at
-  /// least a single element.
+  /// # Panics
+  /// This constructor panics if the provided vector is empty.
   #[inline]
   pub fn from_vec(vec: Vec<T>) -> Self {
     Self::from(vec.into_boxed_slice())
@@ -123,7 +124,7 @@ impl<T> RingBuf<T> {
     self.data.len()
   }
 
-  /// Retrieve the current "front" element.
+  /// Retrieve the current front element.
   #[inline]
   pub fn front(&self) -> &T {
     let idx = self.front_idx();
@@ -136,7 +137,7 @@ impl<T> RingBuf<T> {
     front
   }
 
-  /// Retrieve the current "front" element.
+  /// Retrieve the current front element.
   #[inline]
   pub fn front_mut(&mut self) -> &mut T {
     let idx = self.front_idx();
@@ -149,7 +150,7 @@ impl<T> RingBuf<T> {
     front
   }
 
-  /// Retrieve the current "front" index.
+  /// Retrieve the current front index.
   ///
   /// Note that this index only has real relevance when accessing the
   /// underlying slice. In particular, the index returned by this method

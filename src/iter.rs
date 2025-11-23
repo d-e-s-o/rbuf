@@ -111,11 +111,15 @@ macro_rules! iterator {
 
 iterator! {
   /// An iterator over the elements of a `RingBuf`.
+  ///
+  /// Iteration happens front-to-back, unless reversed.
   #[derive(Copy, Clone, Debug, Eq, PartialEq)]
   struct RingIter, {const}, {}, {const}, {Index::index},
 }
 iterator! {
   /// A mutable iterator over the elements of a `RingBuf`.
+  ///
+  /// Iteration happens front-to-back, unless reversed.
   #[derive(Debug, Eq, PartialEq)]
   struct RingIterMut, {}, {mut}, {mut}, {IndexMut::index_mut},
 }
