@@ -140,6 +140,18 @@ fn iter_next() {
   assert_equal(&buf, &deq);
 }
 
+/// Check that iterator objects can be compared for equality correctly.
+#[test]
+fn iter_eq() {
+  let mut buf1 = ring_buf![1, 2, 3, 4];
+  assert_eq!(buf1.iter(), buf1.iter());
+
+  let mut buf2 = ring_buf![1, 2, 3, 4];
+  assert_eq!(buf2.iter(), buf2.iter());
+
+  assert_ne!(buf1.iter(), buf2.iter());
+  assert_ne!(buf1.iter_mut(), buf2.iter_mut());
+}
 
 /// Check that users cannot create a mutable iterator over a ring buffer
 /// containing objects of a zero sized type.
