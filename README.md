@@ -14,4 +14,4 @@ A crate providing a general purpose ring buffer implementation with some
 non-standard constraints.
 
 
-[docs-rs]: https://docs.rs/crate/rbuf
+[docs-rs]: https://docs.rs/rbuf
