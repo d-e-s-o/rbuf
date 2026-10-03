@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2025 Daniel Mueller <deso@posteo.net>
+# Copyright (C) 2022-2026 Daniel Mueller <deso@posteo.net>
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 name: Test
@@ -51,17 +51,15 @@ jobs:
       uses: codecov/codecov-action@v7
       with:
         files: lcov.info
-  miri:
-    name: Run Miri
+  test-miri:
+    name: Test with Miri
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
-    - name: Install Miri
-      run: |
-        rustup toolchain install nightly --component miri
-        rustup override set nightly
-        cargo miri setup
-    - name: Test with Miri
+    - uses: dtolnay/rust-toolchain@nightly
+      with:
+        components: miri
+    - name: Test
       run: cargo miri test
   clippy:
     name: Lint with clippy
